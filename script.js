@@ -1,7 +1,6 @@
 // ================= PAGE NAVIGATION =================
 
 function showPage(pageId) {
-
     const pages = document.querySelectorAll(".page");
 
     pages.forEach(page => {
@@ -40,9 +39,7 @@ function showPage(pageId) {
 // ================= MOBILE SIDEBAR =================
 
 function toggleSidebar() {
-
     const sidebar = document.querySelector(".sidebar");
-
     sidebar.classList.toggle("show");
 }
 
@@ -50,17 +47,12 @@ function toggleSidebar() {
 // ================= MODAL =================
 
 function openModal() {
-
     const modal = document.getElementById("modal");
-
     modal.classList.add("show");
 }
 
-
 function closeModal() {
-
     const modal = document.getElementById("modal");
-
     modal.classList.remove("show");
 }
 
@@ -68,11 +60,9 @@ function closeModal() {
 // Close modal when clicking outside
 
 document.getElementById("modal").addEventListener("click", function(event) {
-
     if (event.target === this) {
         closeModal();
     }
-
 });
 
 
@@ -92,18 +82,21 @@ async function addStudent(event) {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/students", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                student_id: studentId,
-                name: name,
-                department: department,
-                attendance: Number(attendance)
-            })
-        });
+        const response = await fetch(
+            "https://beyondmarks-1.onrender.com/api/students",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    name: name,
+                    department: department,
+                    attendance: Number(attendance)
+                })
+            }
+        );
 
         const data = await response.json();
 
@@ -122,7 +115,7 @@ async function addStudent(event) {
 
     } catch (error) {
         console.error(error);
-        alert("Could not connect to the backend. Make sure Flask is running.");
+        alert("Could not connect to the backend.");
     }
 }
 
@@ -130,7 +123,6 @@ async function addStudent(event) {
 // ================= STUDENT SEARCH =================
 
 function searchStudent() {
-
     const input = document
         .getElementById("studentSearch")
         .value
@@ -139,19 +131,13 @@ function searchStudent() {
     const rows = document.querySelectorAll("#studentTable tr");
 
     rows.forEach(row => {
-
         const text = row.innerText.toLowerCase();
 
         if (text.includes(input)) {
-
             row.style.display = "";
-
         } else {
-
             row.style.display = "none";
-
         }
-
     });
 }
 
@@ -161,26 +147,30 @@ function searchStudent() {
 document
     .querySelector(".notification")
     .addEventListener("click", function() {
-
         alert("You have 3 new student development updates.");
-
     });
-    async function loadStudents() {
+
+
+// ================= LOAD STUDENTS =================
+
+async function loadStudents() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/students");
+        const response = await fetch(
+            "https://beyondmarks-1.onrender.com/api/students"
+        );
 
         const students = await response.json();
 
         const table = document.getElementById("studentTable");
+        const recentTable = document.getElementById("recentStudentTable");
 
-        // Clear existing students
+        // Clear tables
         table.innerHTML = "";
+        recentTable.innerHTML = "";
 
         students.forEach(student => {
-
-            const row = document.createElement("tr");
 
             const initials = student.name
                 .split(" ")
@@ -188,6 +178,8 @@ document
                 .join("")
                 .substring(0, 2)
                 .toUpperCase();
+
+            const row = document.createElement("tr");
 
             row.innerHTML = `
                 <td>
@@ -202,9 +194,9 @@ document
 
                 <td>${student.department}</td>
 
-                <td>${student.attendance}%</td>
+                <td>${student.cgpa}</td>
 
-                <td>${student.cgpa}%</td>
+                <td>${student.attendance}%</td>
 
                 <td>0 Events</td>
 
@@ -215,11 +207,14 @@ document
                 </td>
             `;
 
+            // Students page
             table.appendChild(row);
 
+            // Dashboard recent students
+            recentTable.appendChild(row.cloneNode(true));
         });
 
-        console.log("Students displayed in table!");
+        console.log("Students displayed successfully!");
 
     } catch (error) {
 
@@ -229,76 +224,103 @@ document
 }
 
 loadStudents();
+
+
 // ================= LOAD ACADEMICS =================
 
 async function loadAcademics() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/academics");
+        const response = await fetch(
+            "https://beyondmarks-1.onrender.com/api/academics"
+        );
 
         const academics = await response.json();
 
         console.log("Academic records:", academics);
-       if (academics.length > 0) {
 
-    const totalCgpa = academics.reduce(
-        (sum, record) => sum + Number(record.cgpa),
-        0
-    );
+        if (academics.length > 0) {
 
-    const totalMarks = academics.reduce(
-        (sum, record) => sum + Number(record.marks),
-        0
-    );
+            const totalCgpa = academics.reduce(
+                (sum, record) => sum + Number(record.cgpa),
+                0
+            );
 
-    const averageCgpa = totalCgpa / academics.length;
-    const averageScore = totalMarks / academics.length;
+            const totalMarks = academics.reduce(
+                (sum, record) => sum + Number(record.marks),
+                0
+            );
 
-    document.getElementById("averageCgpa").textContent =
-        averageCgpa.toFixed(2);
+            const averageCgpa = totalCgpa / academics.length;
+            const averageScore = totalMarks / academics.length;
 
-    document.getElementById("averageScore").textContent =
-        averageScore.toFixed(0) + "%";
-        const cseRecords = academics.filter(record => record.student_id == 3);
+            document.getElementById("averageCgpa").textContent =
+                averageCgpa.toFixed(2);
 
-if (cseRecords.length > 0) {
-    const cseAverage =
-        cseRecords.reduce((sum, record) => sum + Number(record.marks), 0)
-        / cseRecords.length;
+            document.getElementById("averageScore").textContent =
+                averageScore.toFixed(0) + "%";
 
-    document.getElementById("cseBar").style.width = cseAverage + "%";
-    document.getElementById("cseScore").textContent =
-        cseAverage.toFixed(0) + "%";
-}
-document.querySelector(".academic-bars").children[1]
-    .querySelector(".progress div").style.width = "82%";
 
-document.querySelector(".academic-bars").children[1]
-    .querySelector("b").textContent = "82%";
+            // CSE performance
 
-document.querySelector(".academic-bars").children[2]
-    .querySelector(".progress div").style.width = "79%";
+            const cseRecords = academics.filter(
+                record => record.student_id == 3
+            );
 
-document.querySelector(".academic-bars").children[2]
-    .querySelector("b").textContent = "79%";
+            if (cseRecords.length > 0) {
 
-document.querySelector(".academic-bars").children[3]
-    .querySelector(".progress div").style.width = "76%";
+                const cseAverage =
+                    cseRecords.reduce(
+                        (sum, record) => sum + Number(record.marks),
+                        0
+                    ) / cseRecords.length;
 
-document.querySelector(".academic-bars").children[3]
-    .querySelector("b").textContent = "76%";
-        if (academics.length >= 2) {
+                document.getElementById("cseBar").style.width =
+                    cseAverage + "%";
 
-    const firstMarks = Number(academics[0].marks);
-    const lastMarks = Number(academics[academics.length - 1].marks);
+                document.getElementById("cseScore").textContent =
+                    cseAverage.toFixed(0) + "%";
+            }
 
-    const improvement = lastMarks - firstMarks;
 
-    document.getElementById("improvement").textContent =
-        (improvement >= 0 ? "+" : "") + improvement.toFixed(1) + "%";
-}
-} 
+            // Other department values
+
+            document.querySelector(".academic-bars").children[1]
+                .querySelector(".progress div").style.width = "82%";
+
+            document.querySelector(".academic-bars").children[1]
+                .querySelector("b").textContent = "82%";
+
+            document.querySelector(".academic-bars").children[2]
+                .querySelector(".progress div").style.width = "79%";
+
+            document.querySelector(".academic-bars").children[2]
+                .querySelector("b").textContent = "79%";
+
+            document.querySelector(".academic-bars").children[3]
+                .querySelector(".progress div").style.width = "76%";
+
+            document.querySelector(".academic-bars").children[3]
+                .querySelector("b").textContent = "76%";
+
+
+            // Improvement
+
+            if (academics.length >= 2) {
+
+                const firstMarks = Number(academics[0].marks);
+                const lastMarks =
+                    Number(academics[academics.length - 1].marks);
+
+                const improvement = lastMarks - firstMarks;
+
+                document.getElementById("improvement").textContent =
+                    (improvement >= 0 ? "+" : "") +
+                    improvement.toFixed(1) +
+                    "%";
+            }
+        }
 
     } catch (error) {
 
@@ -306,14 +328,19 @@ document.querySelector(".academic-bars").children[3]
 
     }
 }
+
 loadAcademics();
+
+
 // ================= LOAD ACTIVITIES =================
 
 async function loadActivities() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/activities");
+        const response = await fetch(
+            "https://beyondmarks-1.onrender.com/api/activities"
+        );
 
         const activities = await response.json();
 
@@ -344,13 +371,17 @@ async function loadActivities() {
 }
 
 loadActivities();
+
+
 // ================= LOAD SKILLS =================
 
 async function loadSkills() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/skills");
+        const response = await fetch(
+            "https://beyondmarks-1.onrender.com/api/skills"
+        );
 
         const skills = await response.json();
 
@@ -379,19 +410,24 @@ async function loadSkills() {
 }
 
 loadSkills();
+
+
 // ================= LOAD ACHIEVEMENTS =================
 
 async function loadAchievements() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/achievements");
+        const response = await fetch(
+            "https://beyondmarks-1.onrender.com/api/achievements"
+        );
 
         const achievements = await response.json();
 
         if (achievements.length > 0) {
 
-            const achievement = achievements[achievements.length - 1];
+            const achievement =
+                achievements[achievements.length - 1];
 
             document.getElementById("achievementTitle").textContent =
                 achievement.title;
