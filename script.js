@@ -224,6 +224,68 @@ async function loadStudents() {
 }
 
 loadStudents();
+// ================= LOAD DASHBOARD =================
+
+async function loadDashboard() {
+
+    try {
+
+        const studentsResponse = await fetch(
+            "https://beyondmarks-1.onrender.com/api/students"
+        );
+
+        const students = await studentsResponse.json();
+
+        // Total students
+        document.getElementById("totalStudents").textContent =
+            students.length;
+
+        // Average attendance
+        if (students.length > 0) {
+
+            const totalAttendance = students.reduce(
+                (sum, student) => sum + Number(student.attendance),
+                0
+            );
+
+            const averageAttendance =
+                totalAttendance / students.length;
+
+            document.getElementById("averageAttendance").textContent =
+                averageAttendance.toFixed(1) + "%";
+        }
+
+
+        // Activities
+        const activitiesResponse = await fetch(
+            "https://beyondmarks-1.onrender.com/api/activities"
+        );
+
+        const activities = await activitiesResponse.json();
+
+        document.getElementById("totalActivities").textContent =
+            activities.length;
+
+
+        // Achievements
+        const achievementsResponse = await fetch(
+            "https://beyondmarks-1.onrender.com/api/achievements"
+        );
+
+        const achievements = await achievementsResponse.json();
+
+        document.getElementById("totalAchievements").textContent =
+            achievements.length;
+
+    } catch (error) {
+
+        console.error("Could not load dashboard:", error);
+
+    }
+}
+
+loadDashboard();
+
 
 
 // ================= LOAD ACADEMICS =================
