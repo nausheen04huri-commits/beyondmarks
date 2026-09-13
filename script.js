@@ -179,6 +179,40 @@ document
         table.innerHTML = "";
 
         students.forEach(student => {
+            const grid = document.getElementById("studentGrid");
+
+if (grid) {
+    grid.innerHTML = "";
+
+    students.forEach(student => {
+        const card = document.createElement("div");
+        card.className = "student-profile-card";
+
+        const initials = student.name
+            .split(" ")
+            .map(word => word[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+
+        card.innerHTML = `
+            <div class="big-avatar">${initials}</div>
+            <h3>${student.name}</h3>
+            <p>${student.department}</p>
+            <span class="student-id">${student.student_id}</span>
+
+            <div class="profile-stats">
+                <div><strong>${student.cgpa}</strong><span>CGPA</span></div>
+                <div><strong>${student.attendance}%</strong><span>Attendance</span></div>
+                <div><strong>${student.overall_score}</strong><span>Overall</span></div>
+            </div>
+
+            <button class="view-profile">View Full Profile</button>
+        `;
+
+        grid.appendChild(card);
+    });
+}
 
             const row = document.createElement("tr");
 
