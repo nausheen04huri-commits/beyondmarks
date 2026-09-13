@@ -217,6 +217,7 @@ document
             `;
 
             table.appendChild(row);
+            recentTable.appendChild(row.cloneNode(true));
 
         });
 
