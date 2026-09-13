@@ -174,6 +174,7 @@ document
         const students = await response.json();
 
         const table = document.getElementById("studentTable");
+        const recentTable = document.getElementById("recentStudentTable");
 
         // Clear existing students
         table.innerHTML = "";
