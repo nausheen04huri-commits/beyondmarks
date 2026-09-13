@@ -92,7 +92,7 @@ async function addStudent(event) {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/students", {
+        const response = await fetch("https://beyondmarks.onrender.com/api/students", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -169,7 +169,7 @@ document
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/students");
+        const response = await fetch("https://beyondmarks.onrender.com/api/students");
 
         const students = await response.json();
 
@@ -235,7 +235,7 @@ async function loadAcademics() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/academics");
+        const response = await fetch("https://beyondmarks.onrender.com/api/academics");
 
         const academics = await response.json();
 
@@ -313,7 +313,7 @@ async function loadActivities() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/activities");
+        const response = await fetch("https://beyondmarks.onrender.com/api/activities");
 
         const activities = await response.json();
 
@@ -350,7 +350,7 @@ async function loadSkills() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/skills");
+        const response = await fetch("https://beyondmarks.onrender.com/api/skills");
 
         const skills = await response.json();
 
@@ -385,7 +385,7 @@ async function loadAchievements() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/api/achievements");
+        const response = await fetch("https://beyondmarks.onrender.com/api/achievements");
 
         const achievements = await response.json();
 
