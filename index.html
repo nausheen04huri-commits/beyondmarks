@@ -1,0 +1,990 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Beyond Marks | Student Development</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <div class="logo-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+            <h2>Beyond<span>Marks</span></h2>
+            <small>Student Development</small>
+        </div>
+    </div>
+
+    <nav class="menu">
+
+        <a href="#" class="menu-item active" onclick="showPage('dashboard')">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="#" class="menu-item" onclick="showPage('students')">
+            <i class="fa-solid fa-user-graduate"></i>
+            <span>Students</span>
+        </a>
+
+        <a href="#" class="menu-item" onclick="showPage('academics')">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Academics</span>
+        </a>
+
+        <a href="#" class="menu-item" onclick="showPage('activities')">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Activities</span>
+        </a>
+
+        <a href="#" class="menu-item" onclick="showPage('skills')">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>Skills</span>
+        </a>
+
+        <a href="#" class="menu-item" onclick="showPage('achievements')">
+            <i class="fa-solid fa-medal"></i>
+            <span>Achievements</span>
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        <a href="#">
+            <i class="fa-solid fa-gear"></i>
+            Settings
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-circle-question"></i>
+            Help & Support
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+        <button class="mobile-menu" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="page-title">
+            <h1>Student Development Dashboard</h1>
+            <p>Track growth beyond academic marks.</p>
+        </div>
+
+        <div class="top-actions">
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text"
+                       id="studentSearch"
+                       placeholder="Search student..."
+                       onkeyup="searchStudent()">
+            </div>
+
+            <button class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span></span>
+            </button>
+
+            <div class="profile">
+                <div class="avatar">DR</div>
+                <div>
+                    <strong>Dr. Rahul</strong>
+                    <small>Faculty</small>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= DASHBOARD ================= -->
+
+    <section id="dashboard" class="page active-page">
+
+        <div class="welcome">
+            <div>
+                <span class="welcome-tag">ACADEMIC YEAR 2026–27</span>
+                <h2>Good evening, Dr. Rahul 👋</h2>
+                <p>
+                    Here's an overview of your students' holistic development.
+                </p>
+            </div>
+
+            <button class="primary-btn" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i>
+                Add Student
+            </button>
+        </div>
+
+
+        <!-- STAT CARDS -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+                <div>
+                    <p>Total Students</p>
+                    <h3>248</h3>
+                    <span class="positive">
+                        <i class="fa-solid fa-arrow-up"></i> 8.2%
+                    </span>
+                    <small> vs last semester</small>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+
+                <div>
+                    <p>Avg. Attendance</p>
+                    <h3>87.4%</h3>
+                    <span class="positive">
+                        <i class="fa-solid fa-arrow-up"></i> 2.1%
+                    </span>
+                    <small> vs last semester</small>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+
+                <div>
+                    <p>Activities</p>
+                    <h3>156</h3>
+                    <span class="positive">
+                        <i class="fa-solid fa-arrow-up"></i> 14.5%
+                    </span>
+                    <small> this semester</small>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <i class="fa-solid fa-medal"></i>
+                </div>
+
+                <div>
+                    <p>Achievements</p>
+                    <h3>72</h3>
+                    <span class="positive">
+                        <i class="fa-solid fa-arrow-up"></i> 11.3%
+                    </span>
+                    <small> this semester</small>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- CONTENT GRID -->
+
+        <div class="content-grid">
+
+            <!-- DEVELOPMENT OVERVIEW -->
+
+            <div class="card development-card">
+
+                <div class="card-header">
+                    <div>
+                        <h3>Holistic Development</h3>
+                        <p>Average student development across key areas</p>
+                    </div>
+
+                    <select>
+                        <option>This Semester</option>
+                        <option>Last Semester</option>
+                        <option>Academic Year</option>
+                    </select>
+                </div>
+
+
+                <div class="development-list">
+
+                    <div class="development-item">
+                        <div class="development-info">
+                            <span class="circle blue-circle">
+                                <i class="fa-solid fa-book"></i>
+                            </span>
+
+                            <div>
+                                <strong>Academic Performance</strong>
+                                <small>Marks & GPA</small>
+                            </div>
+
+                            <b>82%</b>
+                        </div>
+
+                        <div class="progress">
+                            <div style="width:82%"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="development-item">
+                        <div class="development-info">
+                            <span class="circle green-circle">
+                                <i class="fa-solid fa-calendar"></i>
+                            </span>
+
+                            <div>
+                                <strong>Attendance</strong>
+                                <small>Classes attended</small>
+                            </div>
+
+                            <b>87%</b>
+                        </div>
+
+                        <div class="progress">
+                            <div style="width:87%"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="development-item">
+                        <div class="development-info">
+                            <span class="circle orange-circle">
+                                <i class="fa-solid fa-people-group"></i>
+                            </span>
+
+                            <div>
+                                <strong>Activities</strong>
+                                <small>Clubs & events</small>
+                            </div>
+
+                            <b>74%</b>
+                        </div>
+
+                        <div class="progress">
+                            <div style="width:74%"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="development-item">
+                        <div class="development-info">
+                            <span class="circle purple-circle">
+                                <i class="fa-solid fa-comments"></i>
+                            </span>
+
+                            <div>
+                                <strong>Soft Skills</strong>
+                                <small>Communication & teamwork</small>
+                            </div>
+
+                            <b>79%</b>
+                        </div>
+
+                        <div class="progress">
+                            <div style="width:79%"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OVERALL SCORE -->
+
+            <div class="card score-card">
+
+                <div class="card-header">
+                    <div>
+                        <h3>Overall Development</h3>
+                        <p>Institution average</p>
+                    </div>
+
+                    <i class="fa-solid fa-ellipsis"></i>
+                </div>
+
+
+                <div class="score-circle">
+
+                    <div class="score-inner">
+                        <strong>81</strong>
+                        <span>/ 100</span>
+                    </div>
+
+                </div>
+
+
+                <div class="score-status">
+                    <span class="status-dot"></span>
+                    <strong>Excellent</strong>
+                    <span>+5.4% this semester</span>
+                </div>
+
+
+                <div class="score-breakdown">
+
+                    <div>
+                        <span>Academics</span>
+                        <b>82</b>
+                    </div>
+
+                    <div>
+                        <span>Activities</span>
+                        <b>74</b>
+                    </div>
+
+                    <div>
+                        <span>Skills</span>
+                        <b>79</b>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- STUDENTS TABLE -->
+
+        <div class="card students-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h3>Recent Students</h3>
+                    <p>Recently updated student profiles</p>
+                </div>
+
+                <button class="outline-btn" onclick="showPage('students')">
+                    View All
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Department</th>
+                            <th>Academic</th>
+                            <th>Attendance</th>
+                            <th>Activities</th>
+                            <th>Overall</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="studentTable">
+
+                        <tr>
+                            <td>
+                                <div class="student-name">
+                                    <div class="student-avatar">AS</div>
+                                    <div>
+                                        <strong>Arun Sharma</strong>
+                                        <small>BM2026001</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>CSE</td>
+
+                            <td>88%</td>
+
+                            <td>92%</td>
+
+                            <td>7 Events</td>
+
+                            <td><strong>89</strong></td>
+
+                            <td>
+                                <span class="badge excellent">Excellent</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <div class="student-name">
+                                    <div class="student-avatar avatar-2">PK</div>
+                                    <div>
+                                        <strong>Priya Kumar</strong>
+                                        <small>BM2026014</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>ECE</td>
+
+                            <td>84%</td>
+
+                            <td>89%</td>
+
+                            <td>5 Events</td>
+
+                            <td><strong>84</strong></td>
+
+                            <td>
+                                <span class="badge good">Good</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <div class="student-name">
+                                    <div class="student-avatar avatar-3">RV</div>
+                                    <div>
+                                        <strong>Rahul Verma</strong>
+                                        <small>BM2026027</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>IT</td>
+
+                            <td>79%</td>
+
+                            <td>82%</td>
+
+                            <td>9 Events</td>
+
+                            <td><strong>82</strong></td>
+
+                            <td>
+                                <span class="badge good">Good</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <div class="student-name">
+                                    <div class="student-avatar avatar-4">NS</div>
+                                    <div>
+                                        <strong>Neha Singh</strong>
+                                        <small>BM2026035</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>CSE</td>
+
+                            <td>91%</td>
+
+                            <td>95%</td>
+
+                            <td>4 Events</td>
+
+                            <td><strong>91</strong></td>
+
+                            <td>
+                                <span class="badge excellent">Excellent</span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= STUDENTS PAGE ================= -->
+
+    <section id="students" class="page">
+
+        <div class="page-heading">
+            <div>
+                <h2>Students</h2>
+                <p>Manage and monitor student development.</p>
+            </div>
+
+            <button class="primary-btn" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i>
+                Add Student
+            </button>
+        </div>
+
+
+        <div class="student-grid">
+
+            <div class="student-profile-card">
+
+                <div class="big-avatar">AS</div>
+
+                <h3>Arun Sharma</h3>
+
+                <p>Computer Science & Engineering</p>
+
+                <span class="student-id">BM2026001</span>
+
+                <div class="profile-stats">
+                    <div>
+                        <strong>8.8</strong>
+                        <span>CGPA</span>
+                    </div>
+
+                    <div>
+                        <strong>92%</strong>
+                        <span>Attendance</span>
+                    </div>
+
+                    <div>
+                        <strong>89</strong>
+                        <span>Overall</span>
+                    </div>
+                </div>
+
+                <button class="view-profile">
+                    View Full Profile
+                </button>
+
+            </div>
+
+
+            <div class="student-profile-card">
+
+                <div class="big-avatar avatar-2">PK</div>
+
+                <h3>Priya Kumar</h3>
+
+                <p>Electronics & Communication</p>
+
+                <span class="student-id">BM2026014</span>
+
+                <div class="profile-stats">
+                    <div>
+                        <strong>8.4</strong>
+                        <span>CGPA</span>
+                    </div>
+
+                    <div>
+                        <strong>89%</strong>
+                        <span>Attendance</span>
+                    </div>
+
+                    <div>
+                        <strong>84</strong>
+                        <span>Overall</span>
+                    </div>
+                </div>
+
+                <button class="view-profile">
+                    View Full Profile
+                </button>
+
+            </div>
+
+
+            <div class="student-profile-card">
+
+                <div class="big-avatar avatar-3">RV</div>
+
+                <h3>Rahul Verma</h3>
+
+                <p>Information Technology</p>
+
+                <span class="student-id">BM2026027</span>
+
+                <div class="profile-stats">
+                    <div>
+                        <strong>7.9</strong>
+                        <span>CGPA</span>
+                    </div>
+
+                    <div>
+                        <strong>82%</strong>
+                        <span>Attendance</span>
+                    </div>
+
+                    <div>
+                        <strong>82</strong>
+                        <span>Overall</span>
+                    </div>
+                </div>
+
+                <button class="view-profile">
+                    View Full Profile
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ACADEMICS PAGE ================= -->
+
+    <section id="academics" class="page">
+
+        <div class="page-heading">
+            <div>
+                <h2>Academic Performance</h2>
+                <p>Track academic progress and performance.</p>
+            </div>
+        </div>
+
+        <div class="academic-overview">
+
+            <div class="card academic-box">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>Average CGPA</span>
+                <strong id="averageCgpa">0.00</strong>
+            </div>
+
+            <div class="card academic-box">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Average Score</span>
+                <strong id="averageScore">0%</strong>
+            </div>
+
+            <div class="card academic-box">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span>Improvement</span>
+                <strong id="improvement">0%</strong>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+                <div>
+                    <h3>Academic Performance</h3>
+                    <p>Department-wise performance</p>
+                </div>
+            </div>
+
+            <div class="academic-bars">
+
+                <div>
+                    <span>CSE</span>
+                    <div class="progress">
+                        <div id="cseBar" style="width:0%"></div>
+                    </div>
+                    <b id="cseScore">0%</b>
+                </div>
+
+                <div>
+                    <span>ECE</span>
+                    <div class="progress">
+                        <div style="width:82%"></div>
+                    </div>
+                    <b>82%</b>
+                </div>
+
+                <div>
+                    <span>IT</span>
+                    <div class="progress">
+                        <div style="width:79%"></div>
+                    </div>
+                    <b>79%</b>
+                </div>
+
+                <div>
+                    <span>EEE</span>
+                    <div class="progress">
+                        <div style="width:76%"></div>
+                    </div>
+                    <b>76%</b>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ACTIVITIES PAGE ================= -->
+
+    <section id="activities" class="page">
+
+        <div class="page-heading">
+            <div>
+                <h2>Activities & Participation</h2>
+                <p>Track clubs, events and extracurricular participation.</p>
+            </div>
+        </div>
+
+        <div class="activity-grid">
+
+            <div class="activity-card">
+                <div class="activity-icon">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <h3>Technical Clubs</h3>
+                <strong id="technicalClubs">0</strong>
+                <p>Students participated</p>
+            </div>
+
+            <div class="activity-card">
+                <div class="activity-icon">
+                    <i class="fa-solid fa-microphone"></i>
+                </div>
+                <h3>Events</h3>
+                <strong id="eventsCount">0</strong>
+                <p>Events participated</p>
+            </div>
+
+            <div class="activity-card">
+                <div class="activity-icon">
+                    <i class="fa-solid fa-people-group"></i>
+                </div>
+                <h3>Team Activities</h3>
+                <strong id="teamActivities">0</strong>
+                <p>Students participated</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= SKILLS PAGE ================= -->
+
+    <section id="skills" class="page">
+
+        <div class="page-heading">
+            <div>
+                <h2>Skills Development</h2>
+                <p>Monitor technical and soft-skill development.</p>
+            </div>
+        </div>
+
+        <div class="skills-container card">
+
+            <div class="skill-row">
+                <div>
+                    <strong>Communication</strong>
+                    <small>Presentation & speaking</small>
+                </div>
+
+                <div class="skill-progress">
+                    <div style="width:79%"></div>
+                </div>
+
+                <b id="communicationScore">0%</b>
+            </div>
+
+            <div class="skill-row">
+                <div>
+                    <strong>Teamwork</strong>
+                    <small>Collaboration</small>
+                </div>
+
+                <div class="skill-progress">
+                    <div style="width:84%"></div>
+                </div>
+
+                <<b id="teamworkScore">0%</b>
+            </div>
+
+            <div class="skill-row">
+                <div>
+                    <strong>Leadership</strong>
+                    <small>Leadership activities</small>
+                </div>
+
+                <div class="skill-progress">
+                    <div style="width:72%"></div>
+                </div>
+
+                <b id="leadershipScore">0%</b>
+            </div>
+
+            <div class="skill-row">
+                <div>
+                    <strong>Technical Skills</strong>
+                    <small>Programming & technology</small>
+                </div>
+
+                <div class="skill-progress">
+                    <div style="width:88%"></div>
+                </div>
+
+                <b id="technicalScore">0%</b>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ACHIEVEMENTS PAGE ================= -->
+
+    <section id="achievements" class="page">
+
+        <div class="page-heading">
+            <div>
+                <h2>Achievements</h2>
+                <p>Recognize student accomplishments.</p>
+            </div>
+
+            <button class="primary-btn" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i>
+                Add Achievement
+            </button>
+        </div>
+
+
+        <div class="achievement-grid">
+
+            <div class="achievement-card">
+                <div class="medal">
+                    🥇
+                </div>
+                <h3 id="achievementTitle">No achievement yet</h3>
+                <p id="achievementStudent">No student</p>
+                <small id="achievementDetails">-</small>
+            </div>
+
+            <div class="achievement-card">
+                <div class="medal">
+                    🏆
+                </div>
+                <h3>Best Speaker</h3>
+                <p>Priya Kumar</p>
+                <small>College Event • 2026</small>
+            </div>
+
+            <div class="achievement-card">
+                <div class="medal">
+                    🥈
+                </div>
+                <h3>Project Excellence</h3>
+                <p>Rahul Verma</p>
+                <small>Department • 2026</small>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ================= ADD STUDENT MODAL ================= -->
+
+<div class="modal-overlay" id="modal">
+
+    <div class="modal">
+
+        <button class="close-modal" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h2>Add Student</h2>
+
+        <p>Create a new student development profile.</p>
+
+        <form id="studentForm" onsubmit="addStudent(event); return false;">
+
+            <label>Student Name</label>
+
+            <input
+                type="text"
+                id="name"
+                placeholder="Enter student name"
+                required
+            >
+
+            <label>Student ID</label>
+
+            <input
+                type="text"
+                id="studentId"
+                placeholder="BM2026001"
+                required
+            >
+
+            <label>Department</label>
+
+            <select id="department">
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="IT">IT</option>
+                <option value="EEE">EEE</option>
+                <option value="Mechanical">Mechanical</option>
+            </select>
+
+            <label>Attendance %</label>
+
+            <input
+                type="number"
+                id="attendance"
+                min="0"
+                max="100"
+                placeholder="85"
+                required
+            >
+
+            <button
+                class="primary-btn full-btn"
+                type="submit"
+            >
+                Add Student
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
+```
