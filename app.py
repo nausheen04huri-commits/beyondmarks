@@ -352,7 +352,7 @@ def env_test():
         "DB_USER": os.getenv("DB_USER"),
         "DB_NAME": os.getenv("DB_NAME"),
         "RENDER": os.getenv("RENDER"),
-        "PATH_EXISTS": "PATH" in os.environ
+        "PATH_EXISTS": "PATH" in os.environ,
         "TEST_VALUE": os.getenv("TEST_VALUE")
     }
 if __name__ == "__main__": 
