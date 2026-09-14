@@ -26,7 +26,7 @@ function showPage(pageId) {
     });
 
     const clickedItem = document.querySelector(
-        `.menu-item[onclick="showPage('${pageId}')"]`
+        '.menu-item[onclick="showPage(\'' + pageId + '\')"]'
     );
 
     if (clickedItem) {
