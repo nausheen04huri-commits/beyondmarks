@@ -12,25 +12,23 @@ let achievements = [];
 
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(function(page) {
-        page.classList.remove("active");
+        page.classList.remove("active-page");
     });
 
     const page = document.getElementById(pageId);
 
     if (page) {
-        page.classList.add("active");
+        page.classList.add("active-page");
     }
 
     document.querySelectorAll(".menu-item").forEach(function(item) {
         item.classList.remove("active");
     });
 
-    const items = document.querySelectorAll(".menu-item");
+    document.querySelectorAll(".menu-item").forEach(function(item) {
+        const text = item.getAttribute("onclick") || "";
 
-    items.forEach(function(item) {
-        const onclickText = item.getAttribute("onclick");
-
-        if (onclickText && onclickText.indexOf("showPage('" + pageId + "')") !== -1) {
+        if (text.indexOf("showPage('" + pageId + "')") !== -1) {
             item.classList.add("active");
         }
     });
@@ -56,7 +54,7 @@ function openModal() {
     const modal = document.getElementById("modal");
 
     if (modal) {
-        modal.style.display = "flex";
+        modal.classList.add("show");
     }
 }
 
@@ -64,7 +62,7 @@ function closeModal() {
     const modal = document.getElementById("modal");
 
     if (modal) {
-        modal.style.display = "none";
+        modal.classList.remove("show");
     }
 }
 
@@ -72,48 +70,12 @@ function closeModal() {
    HELPERS
 ========================= */
 
-function numberValue(value) {
-    const number = Number(value);
-
-    if (isNaN(number)) {
-        return 0;
-    }
-
-    return number;
+function num(value) {
+    const n = Number(value);
+    return isNaN(n) ? 0 : n;
 }
 
-function percentage(value) {
-    return numberValue(value).toFixed(1);
-}
-
-function getInitials(name) {
-    if (!name) {
-        return "ST";
-    }
-
-    const words = String(name).trim().split(" ");
-
-    if (words.length === 1) {
-        return words[0].substring(0, 2).toUpperCase();
-    }
-
-    return (
-        words[0].charAt(0) +
-        words[words.length - 1].charAt(0)
-    ).toUpperCase();
-}
-
-async function getJSON(url, options) {
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-        throw new Error("Request failed: " + response.status);
-    }
-
-    return await response.json();
-}
-
-function escapeHTML(value) {
+function esc(value) {
     return String(value == null ? "" : value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -122,24 +84,51 @@ function escapeHTML(value) {
         .replace(/'/g, "&#039;");
 }
 
+function initials(name) {
+    if (!name) {
+        return "ST";
+    }
+
+    const parts = String(name).trim().split(/\s+/);
+
+    if (parts.length === 1) {
+        return parts[0].substring(0, 2).toUpperCase();
+    }
+
+    return (
+        parts[0][0] +
+        parts[parts.length - 1][0]
+    ).toUpperCase();
+}
+
+async function getData(url, options) {
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+    }
+
+    return await response.json();
+}
+
 /* =========================
    STUDENTS
 ========================= */
 
 async function loadStudents() {
     try {
-        students = await getJSON(API + "/api/students");
+        students = await getData(API + "/api/students");
 
-        renderStudents();
+        renderStudentTable();
         renderRecentStudents();
         renderStudentCards();
-        updateDashboardStats();
+        updateDashboard();
     } catch (error) {
-        console.error("Students error:", error);
+        console.error("Students:", error);
     }
 }
 
-function renderStudents() {
+function renderStudentTable() {
     const table = document.getElementById("studentTable");
 
     if (!table) {
@@ -151,11 +140,29 @@ function renderStudents() {
     students.forEach(function(student) {
         const row = document.createElement("tr");
 
+        const academic =
+            num(student.overall_score) > 0
+                ? num(student.overall_score).toFixed(0) + "%"
+                : "-";
+
         row.innerHTML =
-            "<td>" + escapeHTML(student.student_id) + "</td>" +
-            "<td>" + escapeHTML(student.name) + "</td>" +
-            "<td>" + escapeHTML(student.department) + "</td>" +
-            "<td>" + percentage(student.attendance) + "%</td>";
+            "<td>" +
+                "<div class='student-name'>" +
+                    "<div class='student-avatar'>" +
+                        esc(initials(student.name)) +
+                    "</div>" +
+                    "<div>" +
+                        "<strong>" + esc(student.name) + "</strong>" +
+                        "<small>" + esc(student.student_id) + "</small>" +
+                    "</div>" +
+                "</div>" +
+            "</td>" +
+            "<td>" + esc(student.department) + "</td>" +
+            "<td>" + academic + "</td>" +
+            "<td>" + num(student.attendance).toFixed(1) + "%</td>" +
+            "<td>-</td>" +
+            "<td>" + academic + "</td>" +
+            "<td><span class='badge good'>Active</span></td>";
 
         table.appendChild(row);
     });
@@ -173,18 +180,36 @@ function renderRecentStudents() {
     students.slice(0, 5).forEach(function(student) {
         const row = document.createElement("tr");
 
+        const academic =
+            num(student.overall_score) > 0
+                ? num(student.overall_score).toFixed(0) + "%"
+                : "-";
+
         row.innerHTML =
-            "<td>" + escapeHTML(student.student_id) + "</td>" +
-            "<td>" + escapeHTML(student.name) + "</td>" +
-            "<td>" + escapeHTML(student.department) + "</td>" +
-            "<td>" + percentage(student.attendance) + "%</td>";
+            "<td>" +
+                "<div class='student-name'>" +
+                    "<div class='student-avatar'>" +
+                        esc(initials(student.name)) +
+                    "</div>" +
+                    "<div>" +
+                        "<strong>" + esc(student.name) + "</strong>" +
+                        "<small>" + esc(student.student_id) + "</small>" +
+                    "</div>" +
+                "</div>" +
+            "</td>" +
+            "<td>" + esc(student.department) + "</td>" +
+            "<td>" + academic + "</td>" +
+            "<td>" + num(student.attendance).toFixed(1) + "%</td>" +
+            "<td>-</td>" +
+            "<td>" + academic + "</td>" +
+            "<td><span class='badge good'>Active</span></td>";
 
         table.appendChild(row);
     });
 }
 
 function renderStudentCards() {
-    const grid = document.querySelector(".student-grid");
+    const grid = document.getElementById("studentGrid");
 
     if (!grid) {
         return;
@@ -195,56 +220,107 @@ function renderStudentCards() {
     students.forEach(function(student) {
         const card = document.createElement("div");
 
-        card.className = "student-card";
+        card.className = "student-profile-card";
 
         card.innerHTML =
-            "<div class=\"student-avatar\">" +
-                escapeHTML(getInitials(student.name)) +
+            "<div class='big-avatar'>" +
+                esc(initials(student.name)) +
             "</div>" +
-            "<div>" +
-                "<h3>" + escapeHTML(student.name) + "</h3>" +
-                "<p>" + escapeHTML(student.student_id) + "</p>" +
-                "<p>" + escapeHTML(student.department) + "</p>" +
-                "<p>Attendance: " + percentage(student.attendance) + "%</p>" +
+            "<h3>" + esc(student.name) + "</h3>" +
+            "<p>" + esc(student.department) + "</p>" +
+            "<span class='student-id'>" +
+                esc(student.student_id) +
+            "</span>" +
+            "<div class='profile-stats'>" +
+                "<div>" +
+                    "<strong>" + num(student.cgpa).toFixed(2) + "</strong>" +
+                    "<span>CGPA</span>" +
+                "</div>" +
+                "<div>" +
+                    "<strong>" +
+                        num(student.attendance).toFixed(1) +
+                        "%" +
+                    "</strong>" +
+                    "<span>Attendance</span>" +
+                "</div>" +
+                "<div>" +
+                    "<strong>" +
+                        num(student.overall_score).toFixed(0) +
+                    "</strong>" +
+                    "<span>Overall</span>" +
+                "</div>" +
             "</div>";
 
         grid.appendChild(card);
     });
 }
 
-function updateDashboardStats() {
-    const totalStudents = document.getElementById("totalStudents");
-    const averageAttendance = document.getElementById("averageAttendance");
+/* =========================
+   DASHBOARD
+========================= */
 
-    if (totalStudents) {
-        totalStudents.textContent = students.length;
+function updateDashboard() {
+    const total = document.getElementById("totalStudents");
+    const attendance = document.getElementById("averageAttendance");
+
+    if (total) {
+        total.textContent = students.length;
     }
 
-    if (averageAttendance) {
-        if (students.length === 0) {
-            averageAttendance.textContent = "0%";
-        } else {
-            let total = 0;
+    let avgAttendance = 0;
 
-            students.forEach(function(student) {
-                total += numberValue(student.attendance);
-            });
+    if (students.length > 0) {
+        let sum = 0;
 
-            averageAttendance.textContent =
-                (total / students.length).toFixed(1) + "%";
-        }
+        students.forEach(function(student) {
+            sum += num(student.attendance);
+        });
+
+        avgAttendance = sum / students.length;
     }
 
-    const totalStudentsElements =
-        document.querySelectorAll(".stat-card");
+    if (attendance) {
+        attendance.textContent = avgAttendance.toFixed(1) + "%";
+    }
 
-    if (totalStudentsElements.length > 0) {
-        const first = totalStudentsElements[0]
-            .querySelector(".stat-number, h2, h3");
+    const attendanceDashboard =
+        document.getElementById("dashboardAttendance");
 
-        if (first) {
-            first.textContent = students.length;
-        }
+    const attendanceBar =
+        document.getElementById("dashboardAttendanceBar");
+
+    if (attendanceDashboard) {
+        attendanceDashboard.textContent =
+            avgAttendance.toFixed(1) + "%";
+    }
+
+    if (attendanceBar) {
+        attendanceBar.style.width =
+            Math.min(avgAttendance, 100) + "%";
+    }
+
+    const overallValues = students
+        .map(function(student) {
+            return num(student.overall_score);
+        })
+        .filter(function(value) {
+            return value > 0;
+        });
+
+    let overall = 0;
+
+    if (overallValues.length > 0) {
+        overall =
+            overallValues.reduce(function(a, b) {
+                return a + b;
+            }, 0) / overallValues.length;
+    }
+
+    const overallElement =
+        document.getElementById("overallDevelopment");
+
+    if (overallElement) {
+        overallElement.textContent = overall.toFixed(0);
     }
 }
 
@@ -254,49 +330,85 @@ function updateDashboardStats() {
 
 async function loadAcademics() {
     try {
-        academics = await getJSON(API + "/api/academics");
+        academics = await getData(API + "/api/academics");
+
         renderAcademics();
     } catch (error) {
-        console.error("Academics error:", error);
+        console.error("Academics:", error);
     }
 }
 
 function renderAcademics() {
-    const container = document.getElementById("academicBars");
+    const bars = document.querySelector(".academic-bars");
 
-    if (!container) {
+    if (!bars) {
         return;
     }
 
-    container.innerHTML = "";
+    const existingRows = bars.querySelectorAll(":scope > div");
 
-    if (academics.length === 0) {
-        container.innerHTML = "<p>No academic records available.</p>";
-        return;
-    }
+    let totalMarks = 0;
+    let totalCgpa = 0;
 
     academics.forEach(function(record) {
-        const item = document.createElement("div");
-
-        item.className = "academic-bar";
-
-        item.innerHTML =
-            "<div>" +
-                "<strong>Semester " +
-                escapeHTML(record.semester) +
-                "</strong>" +
-                "<span>" +
-                numberValue(record.marks).toFixed(1) +
-                "%</span>" +
-            "</div>" +
-            "<div class=\"bar\">" +
-                "<div class=\"fill\" style=\"width:" +
-                Math.min(numberValue(record.marks), 100) +
-                "%\"></div>" +
-            "</div>";
-
-        container.appendChild(item);
+        totalMarks += num(record.marks);
+        totalCgpa += num(record.cgpa);
     });
+
+    const avgMarks =
+        academics.length > 0
+            ? totalMarks / academics.length
+            : 0;
+
+    const avgCgpa =
+        academics.length > 0
+            ? totalCgpa / academics.length
+            : 0;
+
+    const averageScore =
+        document.getElementById("averageScore");
+
+    const averageCgpa =
+        document.getElementById("averageCgpa");
+
+    if (averageScore) {
+        averageScore.textContent =
+            avgMarks.toFixed(1) + "%";
+    }
+
+    if (averageCgpa) {
+        averageCgpa.textContent =
+            avgCgpa.toFixed(2);
+    }
+
+    const dashboardAcademic =
+        document.getElementById("dashboardAcademic");
+
+    const dashboardAcademicBar =
+        document.getElementById("dashboardAcademicBar");
+
+    if (dashboardAcademic) {
+        dashboardAcademic.textContent =
+            avgMarks.toFixed(1) + "%";
+    }
+
+    if (dashboardAcademicBar) {
+        dashboardAcademicBar.style.width =
+            Math.min(avgMarks, 100) + "%";
+    }
+
+    if (existingRows.length > 0) {
+        const cseBar = document.getElementById("cseBar");
+        const cseScore = document.getElementById("cseScore");
+
+        if (cseBar && cseScore) {
+            cseBar.style.width =
+                Math.min(avgMarks, 100) + "%";
+
+            cseScore.textContent =
+                avgMarks.toFixed(1) + "%";
+        }
+    }
 }
 
 /* =========================
@@ -305,48 +417,79 @@ function renderAcademics() {
 
 async function loadActivities() {
     try {
-        activities = await getJSON(API + "/api/activities");
-        renderActivities();
+        activities = await getData(API + "/api/activities");
 
-        const element = document.getElementById("totalActivities");
+        const total = document.getElementById("totalActivities");
 
-        if (element) {
-            element.textContent = activities.length;
+        if (total) {
+            total.textContent = activities.length;
+        }
+
+        const technical =
+            document.getElementById("technicalClubs");
+
+        const events =
+            document.getElementById("eventsCount");
+
+        const team =
+            document.getElementById("teamActivities");
+
+        let technicalCount = 0;
+        let eventCount = 0;
+        let teamCount = 0;
+
+        activities.forEach(function(activity) {
+            const type =
+                String(activity.activity_type || "")
+                .toLowerCase();
+
+            if (type.indexOf("technical") !== -1) {
+                technicalCount++;
+            } else if (type.indexOf("team") !== -1) {
+                teamCount++;
+            } else {
+                eventCount++;
+            }
+        });
+
+        if (technical) {
+            technical.textContent = technicalCount;
+        }
+
+        if (events) {
+            events.textContent = eventCount;
+        }
+
+        if (team) {
+            team.textContent = teamCount;
+        }
+
+        const dashboardActivities =
+            document.getElementById("dashboardActivities");
+
+        const dashboardActivitiesBar =
+            document.getElementById("dashboardActivitiesBar");
+
+        const activityPercent =
+            students.length > 0
+                ? Math.min(
+                    (activities.length / students.length) * 100,
+                    100
+                )
+                : 0;
+
+        if (dashboardActivities) {
+            dashboardActivities.textContent =
+                activityPercent.toFixed(1) + "%";
+        }
+
+        if (dashboardActivitiesBar) {
+            dashboardActivitiesBar.style.width =
+                activityPercent + "%";
         }
     } catch (error) {
-        console.error("Activities error:", error);
+        console.error("Activities:", error);
     }
-}
-
-function renderActivities() {
-    const grid = document.getElementById("activityGrid");
-
-    if (!grid) {
-        return;
-    }
-
-    grid.innerHTML = "";
-
-    if (activities.length === 0) {
-        grid.innerHTML = "<p>No activities available.</p>";
-        return;
-    }
-
-    activities.forEach(function(activity) {
-        const card = document.createElement("div");
-
-        card.className = "activity-card";
-
-        card.innerHTML =
-            "<h3>" +
-            escapeHTML(activity.activity_name) +
-            "</h3>" +
-            "<p>" +
-            escapeHTML(activity.activity_type || "Activity") +
-            "</p>";
-
-        grid.appendChild(card);
-    });
 }
 
 /* =========================
@@ -355,51 +498,87 @@ function renderActivities() {
 
 async function loadSkills() {
     try {
-        skills = await getJSON(API + "/api/skills");
-        renderSkills();
+        skills = await getData(API + "/api/skills");
+
+        if (skills.length === 0) {
+            return;
+        }
+
+        let communication = 0;
+        let teamwork = 0;
+        let leadership = 0;
+        let technical = 0;
+
+        skills.forEach(function(skill) {
+            communication += num(skill.communication);
+            teamwork += num(skill.teamwork);
+            leadership += num(skill.leadership);
+            technical += num(skill.technical);
+        });
+
+        communication /= skills.length;
+        teamwork /= skills.length;
+        leadership /= skills.length;
+        technical /= skills.length;
+
+        setSkill("communicationScore", communication);
+        setSkill("teamworkScore", teamwork);
+        setSkill("leadershipScore", leadership);
+        setSkill("technicalScore", technical);
+
+        const dashboardSkills =
+            document.getElementById("dashboardSkills");
+
+        const dashboardSkillsBar =
+            document.getElementById("dashboardSkillsBar");
+
+        const avg =
+            (communication +
+                teamwork +
+                leadership +
+                technical) / 4;
+
+        if (dashboardSkills) {
+            dashboardSkills.textContent =
+                avg.toFixed(1) + "%";
+        }
+
+        if (dashboardSkillsBar) {
+            dashboardSkillsBar.style.width =
+                avg + "%";
+        }
+
+        const overallSkills =
+            document.getElementById("overallSkills");
+
+        if (overallSkills) {
+            overallSkills.textContent =
+                avg.toFixed(0);
+        }
     } catch (error) {
-        console.error("Skills error:", error);
+        console.error("Skills:", error);
     }
 }
 
-function renderSkills() {
-    const container = document.getElementById("skillsContainer");
+function setSkill(id, value) {
+    const element = document.getElementById(id);
 
-    if (!container) {
-        return;
+    if (element) {
+        element.textContent =
+            value.toFixed(1) + "%";
+
+        const row = element.parentElement;
+
+        if (row) {
+            const bar =
+                row.querySelector(".skill-progress div");
+
+            if (bar) {
+                bar.style.width =
+                    Math.min(value, 100) + "%";
+            }
+        }
     }
-
-    container.innerHTML = "";
-
-    if (skills.length === 0) {
-        container.innerHTML = "<p>No skill records available.</p>";
-        return;
-    }
-
-    skills.forEach(function(skill) {
-        const card = document.createElement("div");
-
-        card.className = "skill-card";
-
-        card.innerHTML =
-            "<h3>" +
-            escapeHTML(skill.name || "Student") +
-            "</h3>" +
-            "<p>Communication: " +
-            numberValue(skill.communication) +
-            "%</p>" +
-            "<p>Teamwork: " +
-            numberValue(skill.teamwork) +
-            "%</p>" +
-            "<p>Leadership: " +
-            numberValue(skill.leadership) +
-            "%</p>" +
-            "<p>Technical: " +
-            numberValue(skill.technical) +
-            "%</p>";
-
-        container.appendChild(card);
-    });
 }
 
 /* =========================
@@ -408,22 +587,26 @@ function renderSkills() {
 
 async function loadAchievements() {
     try {
-        achievements = await getJSON(API + "/api/achievements");
-        renderAchievements();
+        achievements =
+            await getData(API + "/api/achievements");
 
-        const element =
+        const total =
             document.getElementById("totalAchievements");
 
-        if (element) {
-            element.textContent = achievements.length;
+        if (total) {
+            total.textContent =
+                achievements.length;
         }
+
+        renderAchievements();
     } catch (error) {
-        console.error("Achievements error:", error);
+        console.error("Achievements:", error);
     }
 }
 
 function renderAchievements() {
-    const grid = document.getElementById("achievementGrid");
+    const grid =
+        document.querySelector(".achievement-grid");
 
     if (!grid) {
         return;
@@ -432,25 +615,41 @@ function renderAchievements() {
     grid.innerHTML = "";
 
     if (achievements.length === 0) {
-        grid.innerHTML = "<p>No achievements available.</p>";
+        grid.innerHTML =
+            "<div class='achievement-card'>" +
+                "<div class='medal'>🥇</div>" +
+                "<h3>No achievement yet</h3>" +
+                "<p>No student</p>" +
+                "<small>-</small>" +
+            "</div>";
+
         return;
     }
 
     achievements.forEach(function(achievement) {
-        const card = document.createElement("div");
+        const card =
+            document.createElement("div");
 
-        card.className = "achievement-card";
+        card.className =
+            "achievement-card";
 
         card.innerHTML =
+            "<div class='medal'>🏆</div>" +
             "<h3>" +
-            escapeHTML(achievement.title) +
+                esc(achievement.title) +
             "</h3>" +
             "<p>" +
-            escapeHTML(achievement.level || "") +
+                esc(
+                    achievement.name ||
+                    achievement.student_name ||
+                    "Student"
+                ) +
             "</p>" +
-            "<p>" +
-            escapeHTML(achievement.year || "") +
-            "</p>";
+            "<small>" +
+                esc(achievement.level || "") +
+                " • " +
+                esc(achievement.year || "") +
+            "</small>";
 
         grid.appendChild(card);
     });
@@ -465,29 +664,31 @@ async function addStudent(event) {
         event.preventDefault();
     }
 
-    const nameElement = document.getElementById("studentName");
-    const idElement = document.getElementById("studentId");
-    const departmentElement = document.getElementById("department");
-    const attendanceElement = document.getElementById("attendance");
+    const name =
+        document.getElementById("name");
 
-    if (!nameElement || !idElement || !departmentElement || !attendanceElement) {
+    const studentId =
+        document.getElementById("studentId");
+
+    const department =
+        document.getElementById("department");
+
+    const attendance =
+        document.getElementById("attendance");
+
+    if (!name || !studentId || !department || !attendance) {
         return;
     }
 
     const data = {
-        name: nameElement.value.trim(),
-        student_id: idElement.value.trim(),
-        department: departmentElement.value,
-        attendance: numberValue(attendanceElement.value)
+        name: name.value.trim(),
+        student_id: studentId.value.trim(),
+        department: department.value,
+        attendance: num(attendance.value)
     };
 
-    if (!data.name || !data.student_id || !data.department) {
-        alert("Please fill all required fields.");
-        return;
-    }
-
     try {
-        await getJSON(API + "/api/students", {
+        await getData(API + "/api/students", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -495,17 +696,15 @@ async function addStudent(event) {
             body: JSON.stringify(data)
         });
 
-        closeModal();
+        document.getElementById("studentForm").reset();
 
-        if (nameElement) nameElement.value = "";
-        if (idElement) idElement.value = "";
-        if (attendanceElement) attendanceElement.value = "";
+        closeModal();
 
         await loadStudents();
 
         alert("Student added successfully.");
     } catch (error) {
-        console.error("Add student error:", error);
+        console.error("Add student:", error);
         alert("Unable to add student.");
     }
 }
@@ -515,27 +714,30 @@ async function addStudent(event) {
 ========================= */
 
 function searchStudent() {
-    const searchElement = document.getElementById("search");
+    const input =
+        document.getElementById("studentSearch");
 
-    if (!searchElement) {
+    if (!input) {
         return;
     }
 
-    const value = searchElement.value.toLowerCase().trim();
+    const value =
+        input.value.toLowerCase().trim();
 
-    document.querySelectorAll(".student-card").forEach(function(card) {
-        const text = card.textContent.toLowerCase();
+    document.querySelectorAll(".student-profile-card")
+        .forEach(function(card) {
+            const text =
+                card.textContent.toLowerCase();
 
-        if (text.indexOf(value) !== -1) {
-            card.style.display = "";
-        } else {
-            card.style.display = "none";
-        }
-    });
+            card.style.display =
+                text.indexOf(value) !== -1
+                    ? ""
+                    : "none";
+        });
 }
 
 /* =========================
-   REFRESH EVERYTHING
+   START
 ========================= */
 
 async function refreshAll() {
@@ -546,10 +748,9 @@ async function refreshAll() {
     await loadAchievements();
 }
 
-/* =========================
-   START
-========================= */
-
-document.addEventListener("DOMContentLoaded", function() {
-    refreshAll();
-});
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+        refreshAll();
+    }
+);
