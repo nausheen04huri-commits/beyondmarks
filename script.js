@@ -1,73 +1,62 @@
-```javascript
-// =====================================================
-// BeyondMarks - Frontend JavaScript
-// Connected to Render + MySQL Backend
-// =====================================================
-
 const API = "https://beyondmarks-1.onrender.com";
 
-// =====================================================
-// PAGE NAVIGATION
-// =====================================================
+let students = [];
+let academics = [];
+let activities = [];
+let skills = [];
+let achievements = [];
+
+/* =========================
+   PAGE NAVIGATION
+========================= */
 
 function showPage(pageId) {
-    document.querySelectorAll(".page").forEach(page => {
-        page.classList.remove("active-page");
+    document.querySelectorAll(".page").forEach(function(page) {
+        page.classList.remove("active");
     });
 
-    const selectedPage = document.getElementById(pageId);
+    const page = document.getElementById(pageId);
 
-    if (selectedPage) {
-        selectedPage.classList.add("active-page");
+    if (page) {
+        page.classList.add("active");
     }
 
-    document.querySelectorAll(".menu-item").forEach(item => {
+    document.querySelectorAll(".menu-item").forEach(function(item) {
         item.classList.remove("active");
     });
 
-    const clickedItem = document.querySelector(
-        '.menu-item[onclick="showPage(\'' + pageId + '\')"]'
-    );
+    const items = document.querySelectorAll(".menu-item");
 
-    if (clickedItem) {
-        clickedItem.classList.add("active");
-    }
+    items.forEach(function(item) {
+        const onclickText = item.getAttribute("onclick");
 
-    const sidebar = document.querySelector(".sidebar");
-
-    if (sidebar) {
-        sidebar.classList.remove("show");
-    }
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+        if (onclickText && onclickText.indexOf("showPage('" + pageId + "')") !== -1) {
+            item.classList.add("active");
+        }
     });
 }
 
-
-// =====================================================
-// MOBILE SIDEBAR
-// =====================================================
+/* =========================
+   SIDEBAR
+========================= */
 
 function toggleSidebar() {
     const sidebar = document.querySelector(".sidebar");
 
     if (sidebar) {
-        sidebar.classList.toggle("show");
+        sidebar.classList.toggle("open");
     }
 }
 
-
-// =====================================================
-// MODAL
-// =====================================================
+/* =========================
+   MODAL
+========================= */
 
 function openModal() {
     const modal = document.getElementById("modal");
 
     if (modal) {
-        modal.classList.add("show");
+        modal.style.display = "flex";
     }
 }
 
@@ -75,113 +64,82 @@ function closeModal() {
     const modal = document.getElementById("modal");
 
     if (modal) {
-        modal.classList.remove("show");
+        modal.style.display = "none";
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    const modal = document.getElementById("modal");
-
-    if (modal) {
-        modal.addEventListener("click", function (event) {
-            if (event.target === this) {
-                closeModal();
-            }
-        });
-    }
-
-    const notification = document.querySelector(".notification");
-
-    if (notification) {
-        notification.addEventListener("click", function () {
-            alert("BeyondMarks is connected to the student database.");
-        });
-    }
-
-    // Load database data when page opens
-    refreshAll();
-});
-
-
-// =====================================================
-// HELPER FUNCTIONS
-// =====================================================
-
-function getInitials(name) {
-    return String(name || "")
-        .trim()
-        .split(/\s+/)
-        .map(word => word.charAt(0))
-        .join("")
-        .substring(0, 2)
-        .toUpperCase();
-}
+/* =========================
+   HELPERS
+========================= */
 
 function numberValue(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
+    const number = Number(value);
+
+    if (isNaN(number)) {
+        return 0;
+    }
+
+    return number;
 }
 
 function percentage(value) {
-    return `${numberValue(value).toFixed(1)}%`;
+    return numberValue(value).toFixed(1);
 }
 
-async function getJSON(url) {
-    const response = await fetch(url);
+function getInitials(name) {
+    if (!name) {
+        return "ST";
+    }
+
+    const words = String(name).trim().split(" ");
+
+    if (words.length === 1) {
+        return words[0].substring(0, 2).toUpperCase();
+    }
+
+    return (
+        words[0].charAt(0) +
+        words[words.length - 1].charAt(0)
+    ).toUpperCase();
+}
+
+async function getJSON(url, options) {
+    const response = await fetch(url, options);
 
     if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
+        throw new Error("Request failed: " + response.status);
     }
 
     return await response.json();
 }
 
+function escapeHTML(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
-// =====================================================
-// LOAD STUDENTS
-// =====================================================
+/* =========================
+   STUDENTS
+========================= */
 
 async function loadStudents() {
-
     try {
+        students = await getJSON(API + "/api/students");
 
-        const students = await getJSON(`${API}/api/students`);
-
-        console.log("Students loaded:", students);
-
-        renderStudents(students);
-        updateDashboardStats(students);
-
-        return students;
-
+        renderStudents();
+        renderRecentStudents();
+        renderStudentCards();
+        updateDashboardStats();
     } catch (error) {
-
-        console.error("Error loading students:", error);
-
-        const table = document.getElementById("studentTable");
-
-        if (table) {
-            table.innerHTML = `
-                <tr>
-                    <td colspan="7">
-                        Unable to load students.
-                    </td>
-                </tr>
-            `;
-        }
-
-        return [];
+        console.error("Students error:", error);
     }
 }
 
-
-// =====================================================
-// RENDER STUDENT TABLE
-// =====================================================
-
-function renderStudents(students) {
-
+function renderStudents() {
     const table = document.getElementById("studentTable");
 
     if (!table) {
@@ -190,166 +148,42 @@ function renderStudents(students) {
 
     table.innerHTML = "";
 
-    if (!students || students.length === 0) {
-
-        table.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    No students found.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-    students.forEach((student, index) => {
-
-        const initials = getInitials(student.name);
-
-        const attendance = numberValue(student.attendance);
-        const cgpa = numberValue(student.cgpa);
-        const overall = numberValue(student.overall_score);
-
-        let status = "New";
-        let statusClass = "good";
-
-        if (overall >= 85) {
-            status = "Excellent";
-            statusClass = "excellent";
-        } else if (overall >= 70) {
-            status = "Good";
-            statusClass = "good";
-        }
-
+    students.forEach(function(student) {
         const row = document.createElement("tr");
 
-        row.innerHTML = `
-            <td>
-                <div class="student-name">
-                    <div class="student-avatar ${index % 4 === 1 ? "avatar-2" : index % 4 === 2 ? "avatar-3" : index % 4 === 3 ? "avatar-4" : ""}">
-                        ${initials}
-                    </div>
-
-                    <div>
-                        <strong>${escapeHTML(student.name)}</strong>
-                        <small>${escapeHTML(student.student_id)}</small>
-                    </div>
-                </div>
-            </td>
-
-            <td>${escapeHTML(student.department)}</td>
-
-            <td>${cgpa > 0 ? cgpa.toFixed(2) : "--"}</td>
-
-            <td>${attendance.toFixed(1)}%</td>
-
-            <td>--</td>
-
-            <td>
-                <strong>
-                    ${overall > 0 ? overall.toFixed(1) : "--"}
-                </strong>
-            </td>
-
-            <td>
-                <span class="badge ${statusClass}">
-                    ${status}
-                </span>
-            </td>
-        `;
+        row.innerHTML =
+            "<td>" + escapeHTML(student.student_id) + "</td>" +
+            "<td>" + escapeHTML(student.name) + "</td>" +
+            "<td>" + escapeHTML(student.department) + "</td>" +
+            "<td>" + percentage(student.attendance) + "%</td>";
 
         table.appendChild(row);
     });
-
-    renderRecentStudents(students);
-    renderStudentCards(students);
 }
 
+function renderRecentStudents() {
+    const table = document.getElementById("recentStudentTable");
 
-// =====================================================
-// RECENT STUDENTS
-// =====================================================
-
-function renderRecentStudents(students) {
-
-    const recentTable = document.getElementById("recentStudentTable");
-
-    if (!recentTable) {
+    if (!table) {
         return;
     }
 
-    recentTable.innerHTML = "";
+    table.innerHTML = "";
 
-    const recentStudents = students.slice(-4).reverse();
-
-    recentStudents.forEach((student, index) => {
-
-        const initials = getInitials(student.name);
-
-        const attendance = numberValue(student.attendance);
-        const cgpa = numberValue(student.cgpa);
-        const overall = numberValue(student.overall_score);
-
-        let status = "New";
-        let statusClass = "good";
-
-        if (overall >= 85) {
-            status = "Excellent";
-            statusClass = "excellent";
-        } else if (overall >= 70) {
-            status = "Good";
-            statusClass = "good";
-        }
-
+    students.slice(0, 5).forEach(function(student) {
         const row = document.createElement("tr");
 
-        row.innerHTML = `
-            <td>
-                <div class="student-name">
-                    <div class="student-avatar">
-                        ${initials}
-                    </div>
+        row.innerHTML =
+            "<td>" + escapeHTML(student.student_id) + "</td>" +
+            "<td>" + escapeHTML(student.name) + "</td>" +
+            "<td>" + escapeHTML(student.department) + "</td>" +
+            "<td>" + percentage(student.attendance) + "%</td>";
 
-                    <div>
-                        <strong>${escapeHTML(student.name)}</strong>
-                        <small>${escapeHTML(student.student_id)}</small>
-                    </div>
-                </div>
-            </td>
-
-            <td>${escapeHTML(student.department)}</td>
-
-            <td>${cgpa > 0 ? cgpa.toFixed(2) : "--"}</td>
-
-            <td>${attendance.toFixed(1)}%</td>
-
-            <td>--</td>
-
-            <td>
-                <strong>
-                    ${overall > 0 ? overall.toFixed(1) : "--"}
-                </strong>
-            </td>
-
-            <td>
-                <span class="badge ${statusClass}">
-                    ${status}
-                </span>
-            </td>
-        `;
-
-        recentTable.appendChild(row);
+        table.appendChild(row);
     });
 }
 
-
-// =====================================================
-// STUDENT CARDS
-// =====================================================
-
-function renderStudentCards(students) {
-
+function renderStudentCards() {
     const grid = document.querySelector(".student-grid");
 
     if (!grid) {
@@ -358,360 +192,77 @@ function renderStudentCards(students) {
 
     grid.innerHTML = "";
 
-    students.forEach(student => {
-
-        const initials = getInitials(student.name);
-
-        const attendance = numberValue(student.attendance);
-        const cgpa = numberValue(student.cgpa);
-        const overall = numberValue(student.overall_score);
-
+    students.forEach(function(student) {
         const card = document.createElement("div");
 
-        card.className = "student-profile-card";
+        card.className = "student-card";
 
-        card.innerHTML = `
-            <div class="big-avatar">
-                ${initials}
-            </div>
-
-            <h3>${escapeHTML(student.name)}</h3>
-
-            <p>${escapeHTML(student.department)}</p>
-
-            <span class="student-id">
-                ${escapeHTML(student.student_id)}
-            </span>
-
-            <div class="profile-stats">
-
-                <div>
-                    <strong>
-                        ${cgpa > 0 ? cgpa.toFixed(2) : "--"}
-                    </strong>
-                    <span>CGPA</span>
-                </div>
-
-                <div>
-                    <strong>
-                        ${attendance.toFixed(1)}%
-                    </strong>
-                    <span>Attendance</span>
-                </div>
-
-                <div>
-                    <strong>
-                        ${overall > 0 ? overall.toFixed(1) : "--"}
-                    </strong>
-                    <span>Overall</span>
-                </div>
-
-            </div>
-
-            <button class="view-profile"
-                    onclick="alert('Student: ${escapeJS(student.name)}')">
-                View Full Profile
-            </button>
-        `;
+        card.innerHTML =
+            "<div class=\"student-avatar\">" +
+                escapeHTML(getInitials(student.name)) +
+            "</div>" +
+            "<div>" +
+                "<h3>" + escapeHTML(student.name) + "</h3>" +
+                "<p>" + escapeHTML(student.student_id) + "</p>" +
+                "<p>" + escapeHTML(student.department) + "</p>" +
+                "<p>Attendance: " + percentage(student.attendance) + "%</p>" +
+            "</div>";
 
         grid.appendChild(card);
     });
 }
 
+function updateDashboardStats() {
+    const totalStudents = document.getElementById("totalStudents");
+    const averageAttendance = document.getElementById("averageAttendance");
 
-// =====================================================
-// DASHBOARD STATISTICS
-// =====================================================
-
-function updateDashboardStats(students) {
-
-    const statCards = document.querySelectorAll(".stat-card h3");
-
-    if (!statCards.length) {
-        return;
+    if (totalStudents) {
+        totalStudents.textContent = students.length;
     }
 
-    const totalStudents = students.length;
+    if (averageAttendance) {
+        if (students.length === 0) {
+            averageAttendance.textContent = "0%";
+        } else {
+            let total = 0;
 
-    const attendanceValues = students.map(student =>
-        numberValue(student.attendance)
-    );
+            students.forEach(function(student) {
+                total += numberValue(student.attendance);
+            });
 
-    const averageAttendance =
-        attendanceValues.length > 0
-            ? attendanceValues.reduce((a, b) => a + b, 0) /
-              attendanceValues.length
-            : 0;
-
-    if (statCards[0]) {
-        statCards[0].textContent = totalStudents;
+            averageAttendance.textContent =
+                (total / students.length).toFixed(1) + "%";
+        }
     }
 
-    if (statCards[1]) {
-        statCards[1].textContent =
-            `${averageAttendance.toFixed(1)}%`;
-    }
+    const totalStudentsElements =
+        document.querySelectorAll(".stat-card");
 
-    // Activities and achievements are updated separately
+    if (totalStudentsElements.length > 0) {
+        const first = totalStudentsElements[0]
+            .querySelector(".stat-number, h2, h3");
+
+        if (first) {
+            first.textContent = students.length;
+        }
+    }
 }
 
-
-// =====================================================
-// LOAD ACADEMICS
-// =====================================================
+/* =========================
+   ACADEMICS
+========================= */
 
 async function loadAcademics() {
-
     try {
-
-        const data = await getJSON(`${API}/api/academics`);
-
-        console.log("Academics loaded:", data);
-
-        renderAcademics(data);
-
-        return data;
-
+        academics = await getJSON(API + "/api/academics");
+        renderAcademics();
     } catch (error) {
-
-        console.error("Error loading academics:", error);
-
-        return [];
+        console.error("Academics error:", error);
     }
 }
 
-
-function renderAcademics(data) {
-
-    const academicBars =
-        document.querySelector(".academic-bars");
-
-    if (!academicBars) {
-        return;
-    }
-
-    academicBars.innerHTML = "";
-
-    if (!data || data.length === 0) {
-
-        academicBars.innerHTML =
-            "<p>No academic records available.</p>";
-
-        return;
-    }
-
-    const departments = {};
-
-    data.forEach(record => {
-
-        const department =
-            record.department || "Other";
-
-        if (!departments[department]) {
-            departments[department] = [];
-        }
-
-        departments[department].push(
-            numberValue(record.marks)
-        );
-    });
-
-    Object.keys(departments).forEach(department => {
-
-        const marks = departments[department];
-
-        const average =
-            marks.reduce((a, b) => a + b, 0) /
-            marks.length;
-
-        const value = Math.min(100, Math.max(0, average));
-
-        const item = document.createElement("div");
-
-        item.innerHTML = `
-            <span>${escapeHTML(department)}</span>
-
-            <div class="progress">
-                <div style="width:${value}%"></div>
-            </div>
-
-            <b>${value.toFixed(1)}%</b>
-        `;
-
-        academicBars.appendChild(item);
-    });
-
-    const cgpaValues = data
-        .map(item => numberValue(item.cgpa))
-        .filter(value => value > 0);
-
-    const markValues = data
-        .map(item => numberValue(item.marks))
-        .filter(value => value > 0);
-
-    const averageCgpa =
-        cgpaValues.length
-            ? cgpaValues.reduce((a, b) => a + b, 0) /
-              cgpaValues.length
-            : 0;
-
-    const averageMarks =
-        markValues.length
-            ? markValues.reduce((a, b) => a + b, 0) /
-              markValues.length
-            : 0;
-
-    const boxes =
-        document.querySelectorAll(".academic-box strong");
-
-    if (boxes[0]) {
-        boxes[0].textContent =
-            averageCgpa > 0
-                ? averageCgpa.toFixed(2)
-                : "--";
-    }
-
-    if (boxes[1]) {
-        boxes[1].textContent =
-            averageMarks > 0
-                ? `${averageMarks.toFixed(1)}%`
-                : "--";
-    }
-}
-
-
-// =====================================================
-// LOAD ACTIVITIES
-// =====================================================
-
-async function loadActivities() {
-
-    try {
-
-        const data =
-            await getJSON(`${API}/api/activities`);
-
-        console.log("Activities loaded:", data);
-
-        renderActivities(data);
-
-        return data;
-
-    } catch (error) {
-
-        console.error("Error loading activities:", error);
-
-        return [];
-    }
-}
-
-
-function renderActivities(data) {
-
-    const grid =
-        document.querySelector(".activity-grid");
-
-    if (!grid) {
-        return;
-    }
-
-    grid.innerHTML = "";
-
-    const activities = data || [];
-
-    const total = activities.length;
-
-    const technical =
-        activities.filter(item =>
-            String(item.activity_type || "")
-                .toLowerCase()
-                .includes("technical")
-        ).length;
-
-    const other =
-        total - technical;
-
-    const cards = [
-        {
-            icon: "fa-code",
-            title: "Technical Clubs",
-            value: technical,
-            text: "Students participated"
-        },
-        {
-            icon: "fa-microphone",
-            title: "Events",
-            value: total,
-            text: "Activities recorded"
-        },
-        {
-            icon: "fa-people-group",
-            title: "Other Activities",
-            value: other,
-            text: "Activities recorded"
-        }
-    ];
-
-    cards.forEach(cardData => {
-
-        const card = document.createElement("div");
-
-        card.className = "activity-card";
-
-        card.innerHTML = `
-            <div class="activity-icon">
-                <i class="fa-solid ${cardData.icon}"></i>
-            </div>
-
-            <h3>${cardData.title}</h3>
-
-            <strong>${cardData.value}</strong>
-
-            <p>${cardData.text}</p>
-        `;
-
-        grid.appendChild(card);
-    });
-
-    const statCards =
-        document.querySelectorAll(".stat-card h3");
-
-    if (statCards[2]) {
-        statCards[2].textContent = total;
-    }
-}
-
-
-// =====================================================
-// LOAD SKILLS
-// =====================================================
-
-async function loadSkills() {
-
-    try {
-
-        const data =
-            await getJSON(`${API}/api/skills`);
-
-        console.log("Skills loaded:", data);
-
-        renderSkills(data);
-
-        return data;
-
-    } catch (error) {
-
-        console.error("Error loading skills:", error);
-
-        return [];
-    }
-}
-
-
-function renderSkills(data) {
-
-    const container =
-        document.querySelector(".skills-container");
+function renderAcademics() {
+    const container = document.getElementById("academicBars");
 
     if (!container) {
         return;
@@ -719,104 +270,56 @@ function renderSkills(data) {
 
     container.innerHTML = "";
 
-    if (!data || data.length === 0) {
-
-        container.innerHTML =
-            "<p>No skill records available.</p>";
-
+    if (academics.length === 0) {
+        container.innerHTML = "<p>No academic records available.</p>";
         return;
     }
 
-    const fields = [
-        {
-            key: "communication",
-            name: "Communication",
-            description: "Presentation & speaking"
-        },
-        {
-            key: "teamwork",
-            name: "Teamwork",
-            description: "Collaboration"
-        },
-        {
-            key: "leadership",
-            name: "Leadership",
-            description: "Leadership activities"
-        },
-        {
-            key: "technical",
-            name: "Technical Skills",
-            description: "Programming & technology"
-        }
-    ];
+    academics.forEach(function(record) {
+        const item = document.createElement("div");
 
-    fields.forEach(field => {
+        item.className = "academic-bar";
 
-        const values = data
-            .map(item => numberValue(item[field.key]))
-            .filter(value => value >= 0);
+        item.innerHTML =
+            "<div>" +
+                "<strong>Semester " +
+                escapeHTML(record.semester) +
+                "</strong>" +
+                "<span>" +
+                numberValue(record.marks).toFixed(1) +
+                "%</span>" +
+            "</div>" +
+            "<div class=\"bar\">" +
+                "<div class=\"fill\" style=\"width:" +
+                Math.min(numberValue(record.marks), 100) +
+                "%\"></div>" +
+            "</div>";
 
-        const average =
-            values.length
-                ? values.reduce((a, b) => a + b, 0) /
-                  values.length
-                : 0;
-
-        const value =
-            Math.min(100, Math.max(0, average));
-
-        const row = document.createElement("div");
-
-        row.className = "skill-row";
-
-        row.innerHTML = `
-            <div>
-                <strong>${field.name}</strong>
-                <small>${field.description}</small>
-            </div>
-
-            <div class="skill-progress">
-                <div style="width:${value}%"></div>
-            </div>
-
-            <b>${value.toFixed(1)}%</b>
-        `;
-
-        container.appendChild(row);
+        container.appendChild(item);
     });
 }
 
+/* =========================
+   ACTIVITIES
+========================= */
 
-// =====================================================
-// LOAD ACHIEVEMENTS
-// =====================================================
-
-async function loadAchievements() {
-
+async function loadActivities() {
     try {
+        activities = await getJSON(API + "/api/activities");
+        renderActivities();
 
-        const data =
-            await getJSON(`${API}/api/achievements`);
+        const element = document.getElementById("totalActivities");
 
-        console.log("Achievements loaded:", data);
-
-        renderAchievements(data);
-
-        return data;
-
+        if (element) {
+            element.textContent = activities.length;
+        }
     } catch (error) {
-
-        console.error("Error loading achievements:", error);
-
-        return [];
+        console.error("Activities error:", error);
     }
 }
 
-
-function renderAchievements(data) {
-
-    const grid =
-        document.querySelector(".achievement-grid");
+function renderActivities() {
+    const grid = document.getElementById("activityGrid");
 
     if (!grid) {
         return;
@@ -824,238 +327,229 @@ function renderAchievements(data) {
 
     grid.innerHTML = "";
 
-    if (!data || data.length === 0) {
-
-        grid.innerHTML =
-            "<p>No achievements recorded.</p>";
-
+    if (activities.length === 0) {
+        grid.innerHTML = "<p>No activities available.</p>";
         return;
     }
 
-    const medals = ["🥇", "🏆", "🥈", "🏅"];
+    activities.forEach(function(activity) {
+        const card = document.createElement("div");
 
-    data.forEach((achievement, index) => {
+        card.className = "activity-card";
 
-        const card =
-            document.createElement("div");
-
-        card.className = "achievement-card";
-
-        const year =
-            achievement.year || "N/A";
-
-        const level =
-            achievement.level || "Achievement";
-
-        const studentName =
-            achievement.name ||
-            achievement.student_name ||
-            achievement.student ||
-            "Student";
-
-        card.innerHTML = `
-            <div class="medal">
-                ${medals[index % medals.length]}
-            </div>
-
-            <h3>
-                ${escapeHTML(
-                    achievement.title || "Achievement"
-                )}
-            </h3>
-
-            <p>
-                ${escapeHTML(studentName)}
-            </p>
-
-            <small>
-                ${escapeHTML(level)} • ${year}
-            </small>
-        `;
+        card.innerHTML =
+            "<h3>" +
+            escapeHTML(activity.activity_name) +
+            "</h3>" +
+            "<p>" +
+            escapeHTML(activity.activity_type || "Activity") +
+            "</p>";
 
         grid.appendChild(card);
     });
-
-    const statCards =
-        document.querySelectorAll(".stat-card h3");
-
-    if (statCards[3]) {
-        statCards[3].textContent = data.length;
-    }
 }
 
+/* =========================
+   SKILLS
+========================= */
 
-// =====================================================
-// ADD STUDENT
-// =====================================================
-
-async function addStudent(event) {
-
-    event.preventDefault();
-
-    const name =
-        document.getElementById("name").value.trim();
-
-    const studentId =
-        document.getElementById("studentId").value.trim();
-
-    const department =
-        document.getElementById("department").value;
-
-    const attendance =
-        document.getElementById("attendance").value || 0;
-
-    if (!name || !studentId) {
-
-        alert("Please enter student name and student ID.");
-
-        return;
-    }
-
-    const studentData = {
-        name: name,
-        student_id: studentId,
-        department: department,
-        attendance: Number(attendance)
-    };
-
+async function loadSkills() {
     try {
-
-        const response = await fetch(
-            `${API}/api/students`,
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(studentData)
-            }
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.error ||
-                result.message ||
-                "Failed to add student"
-            );
-        }
-
-        console.log("Student added:", result);
-
-        alert(`${name} has been added successfully!`);
-
-        document.querySelector("#modal form").reset();
-
-        closeModal();
-
-        await loadStudents();
-
-        showPage("students");
-
+        skills = await getJSON(API + "/api/skills");
+        renderSkills();
     } catch (error) {
-
-        console.error("Add student error:", error);
-
-        alert(
-            "Unable to add student.\n\n" +
-            error.message
-        );
+        console.error("Skills error:", error);
     }
 }
 
+function renderSkills() {
+    const container = document.getElementById("skillsContainer");
 
-// =====================================================
-// SEARCH STUDENT
-// =====================================================
-
-function searchStudent() {
-
-    const input =
-        document.getElementById("studentSearch");
-
-    if (!input) {
+    if (!container) {
         return;
     }
 
-    const searchText =
-        input.value.toLowerCase().trim();
+    container.innerHTML = "";
 
-    const rows =
-        document.querySelectorAll("#studentTable tr");
+    if (skills.length === 0) {
+        container.innerHTML = "<p>No skill records available.</p>";
+        return;
+    }
 
-    rows.forEach(row => {
+    skills.forEach(function(skill) {
+        const card = document.createElement("div");
 
-        const text =
-            row.innerText.toLowerCase();
+        card.className = "skill-card";
 
-        row.style.display =
-            text.includes(searchText)
-                ? ""
-                : "none";
+        card.innerHTML =
+            "<h3>" +
+            escapeHTML(skill.name || "Student") +
+            "</h3>" +
+            "<p>Communication: " +
+            numberValue(skill.communication) +
+            "%</p>" +
+            "<p>Teamwork: " +
+            numberValue(skill.teamwork) +
+            "%</p>" +
+            "<p>Leadership: " +
+            numberValue(skill.leadership) +
+            "%</p>" +
+            "<p>Technical: " +
+            numberValue(skill.technical) +
+            "%</p>";
+
+        container.appendChild(card);
     });
 }
 
+/* =========================
+   ACHIEVEMENTS
+========================= */
 
-// =====================================================
-// REFRESH EVERYTHING
-// =====================================================
-
-async function refreshAll() {
-
-    console.log("Connecting to BeyondMarks backend...");
-
+async function loadAchievements() {
     try {
+        achievements = await getJSON(API + "/api/achievements");
+        renderAchievements();
 
-        const students = await loadStudents();
+        const element =
+            document.getElementById("totalAchievements");
 
-        await Promise.all([
-            loadAcademics(),
-            loadActivities(),
-            loadSkills(),
-            loadAchievements()
-        ]);
-
-        console.log(
-            "BeyondMarks connected successfully.",
-            students
-        );
-
+        if (element) {
+            element.textContent = achievements.length;
+        }
     } catch (error) {
-
-        console.error(
-            "Refresh error:",
-            error
-        );
+        console.error("Achievements error:", error);
     }
 }
 
+function renderAchievements() {
+    const grid = document.getElementById("achievementGrid");
 
-// =====================================================
-// SECURITY HELPERS
-// =====================================================
+    if (!grid) {
+        return;
+    }
 
-function escapeHTML(value) {
+    grid.innerHTML = "";
 
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    if (achievements.length === 0) {
+        grid.innerHTML = "<p>No achievements available.</p>";
+        return;
+    }
+
+    achievements.forEach(function(achievement) {
+        const card = document.createElement("div");
+
+        card.className = "achievement-card";
+
+        card.innerHTML =
+            "<h3>" +
+            escapeHTML(achievement.title) +
+            "</h3>" +
+            "<p>" +
+            escapeHTML(achievement.level || "") +
+            "</p>" +
+            "<p>" +
+            escapeHTML(achievement.year || "") +
+            "</p>";
+
+        grid.appendChild(card);
+    });
 }
 
-function escapeJS(value) {
+/* =========================
+   ADD STUDENT
+========================= */
 
-    return String(value ?? "")
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/"/g, '\\"')
-        .replace(/\n/g, "\\n")
-        .replace(/\r/g, "\\r");
+async function addStudent(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    const nameElement = document.getElementById("studentName");
+    const idElement = document.getElementById("studentId");
+    const departmentElement = document.getElementById("department");
+    const attendanceElement = document.getElementById("attendance");
+
+    if (!nameElement || !idElement || !departmentElement || !attendanceElement) {
+        return;
+    }
+
+    const data = {
+        name: nameElement.value.trim(),
+        student_id: idElement.value.trim(),
+        department: departmentElement.value,
+        attendance: numberValue(attendanceElement.value)
+    };
+
+    if (!data.name || !data.student_id || !data.department) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    try {
+        await getJSON(API + "/api/students", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        closeModal();
+
+        if (nameElement) nameElement.value = "";
+        if (idElement) idElement.value = "";
+        if (attendanceElement) attendanceElement.value = "";
+
+        await loadStudents();
+
+        alert("Student added successfully.");
+    } catch (error) {
+        console.error("Add student error:", error);
+        alert("Unable to add student.");
+    }
 }
-```
+
+/* =========================
+   SEARCH
+========================= */
+
+function searchStudent() {
+    const searchElement = document.getElementById("search");
+
+    if (!searchElement) {
+        return;
+    }
+
+    const value = searchElement.value.toLowerCase().trim();
+
+    document.querySelectorAll(".student-card").forEach(function(card) {
+        const text = card.textContent.toLowerCase();
+
+        if (text.indexOf(value) !== -1) {
+            card.style.display = "";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+/* =========================
+   REFRESH EVERYTHING
+========================= */
+
+async function refreshAll() {
+    await loadStudents();
+    await loadAcademics();
+    await loadActivities();
+    await loadSkills();
+    await loadAchievements();
+}
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener("DOMContentLoaded", function() {
+    refreshAll();
+});
