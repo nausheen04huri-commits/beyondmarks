@@ -233,6 +233,180 @@ body {
     margin-left: 3px;
 }
 
+.header-action-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    z-index: 200;
+}
+
+.profile {
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.profile:focus-visible,
+.notification:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+.profile.open > i {
+    transform: rotate(180deg);
+}
+
+.profile > i {
+    transition: transform 0.2s ease;
+}
+
+.notification-panel,
+.profile-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.notification-panel[hidden],
+.profile-menu[hidden],
+.modal-overlay[hidden],
+#signedOutScreen[hidden] {
+    display: none !important;
+}
+
+.notification-panel {
+    width: 350px;
+    max-width: min(350px, calc(100vw - 30px));
+}
+
+.profile-menu {
+    width: 250px;
+    padding: 8px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel-header strong,
+.panel-header small {
+    display: block;
+}
+
+.panel-header small {
+    color: var(--muted);
+    margin-top: 3px;
+    font-size: 10px;
+}
+
+.panel-link {
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.notification-list {
+    max-height: 330px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #f0f1f5;
+    background: #fff;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background: #f8f9ff;
+}
+
+.notification-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 9px;
+    background: #eef0ff;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-copy strong,
+.notification-copy small {
+    display: block;
+}
+
+.notification-copy strong { font-size: 11px; margin-bottom: 3px; }
+.notification-copy small { color: var(--muted); font-size: 10px; line-height: 1.4; }
+.empty-notifications {
+    padding: 30px 15px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.profile-menu-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 5px;
+    background: #f8f9ff;
+    border-radius: 10px;
+}
+
+.profile-menu-head strong,
+.profile-menu-head small { display: block; }
+.profile-menu-head strong { font-size: 12px; }
+.profile-menu-head small { color: var(--muted); font-size: 9px; margin-top: 2px; }
+
+.avatar.large { width: 40px; height: 40px; flex: 0 0 40px; }
+
+.profile-menu > button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #4b5563;
+    cursor: pointer;
+    text-align: left;
+    font-size: 11px;
+}
+
+.profile-menu > button:hover { background: #f1f2ff; color: var(--primary); }
+.profile-menu > button i { width: 16px; text-align: center; }
+.profile-menu .logout-item { color: #dc2626; }
+.menu-divider { height: 1px; background: var(--border); margin: 5px 0; }
+
 .mobile-menu {
     display: none;
 }
@@ -1166,6 +1340,21 @@ td {
     .top-actions .profile > i {
         margin-left: 0;
         font-size: 11px;
+    }
+
+    .notification-panel,
+    .profile-menu {
+        top: calc(100% + 8px);
+    }
+
+    .notification-panel {
+        right: -8px;
+        width: min(350px, calc(100vw - 24px));
+    }
+
+    .profile-menu {
+        right: -4px;
+        width: min(250px, calc(100vw - 24px));
     }
 
     .stats-grid {

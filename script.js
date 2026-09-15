@@ -781,50 +781,42 @@ function closeHeaderMenus() {
     if (notificationPanel) notificationPanel.hidden = true;
     if (profileMenu) profileMenu.hidden = true;
     if (notificationButton) notificationButton.setAttribute("aria-expanded", "false");
-    if (profileButton) profileButton.setAttribute("aria-expanded", "false");
-    if (profileButton) profileButton.classList.remove("open");
-}
-
-function toggleNotifications(event) {
-    if (event) event.stopPropagation();
-
-    const panel = document.getElementById("notificationPanel");
-    const button = document.getElementById("notificationButton");
-    const profileMenu = document.getElementById("profileMenu");
-
-    if (!panel || !button) return;
-
-    const willOpen = panel.hidden;
-    if (profileMenu) profileMenu.hidden = true;
-    const profileButton = document.getElementById("profileButton");
     if (profileButton) {
         profileButton.setAttribute("aria-expanded", "false");
         profileButton.classList.remove("open");
     }
+}
 
-    panel.hidden = !willOpen;
-    button.setAttribute("aria-expanded", String(willOpen));
+function toggleNotifications(event) {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
+    const panel = document.getElementById("notificationPanel");
+    const button = document.getElementById("notificationButton");
+    const menu = document.getElementById("profileMenu");
+    const profileButton = document.getElementById("profileButton");
+    if (!panel || !button) return;
 
-    if (willOpen) renderNotifications();
+    const open = panel.hidden === true;
+    if (menu) menu.hidden = true;
+    if (profileButton) { profileButton.setAttribute("aria-expanded", "false"); profileButton.classList.remove("open"); }
+    panel.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open) renderNotifications();
 }
 
 function toggleProfileMenu(event) {
-    if (event) event.stopPropagation();
-
+    if (event) { event.preventDefault(); event.stopPropagation(); }
     const menu = document.getElementById("profileMenu");
     const button = document.getElementById("profileButton");
-    const notificationPanel = document.getElementById("notificationPanel");
+    const panel = document.getElementById("notificationPanel");
     const notificationButton = document.getElementById("notificationButton");
-
     if (!menu || !button) return;
 
-    const willOpen = menu.hidden;
-    if (notificationPanel) notificationPanel.hidden = true;
+    const open = menu.hidden === true;
+    if (panel) panel.hidden = true;
     if (notificationButton) notificationButton.setAttribute("aria-expanded", "false");
-
-    menu.hidden = !willOpen;
-    button.setAttribute("aria-expanded", String(willOpen));
-    button.classList.toggle("open", willOpen);
+    menu.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    button.classList.toggle("open", open);
 }
 
 function buildNotifications() {
@@ -995,27 +987,31 @@ function showHelpOnEscape(event) {
 document.addEventListener("DOMContentLoaded", function() {
     const notificationButton = document.getElementById("notificationButton");
     const profileButton = document.getElementById("profileButton");
+    const notificationPanel = document.getElementById("notificationPanel");
+    const profileMenu = document.getElementById("profileMenu");
     const settings = getHeaderSettings();
 
-    if (notificationButton) notificationButton.addEventListener("click", toggleNotifications);
-    if (profileButton) profileButton.addEventListener("click", toggleProfileMenu);
+    // Use pointer events so mouse, touch and pen input all behave consistently.
+    if (notificationButton) {
+        notificationButton.addEventListener("pointerdown", toggleNotifications);
+    }
+    if (profileButton) {
+        profileButton.addEventListener("pointerdown", toggleProfileMenu);
+    }
 
-    document.addEventListener("click", function() {
-        closeHeaderMenus();
+    [notificationPanel, profileMenu].forEach(function(element) {
+        if (element) element.addEventListener("pointerdown", function(event) { event.stopPropagation(); });
     });
 
-    ["notificationPanel", "profileMenu"].forEach(function(id) {
-        const element = document.getElementById(id);
-        if (element) element.addEventListener("click", function(event) { event.stopPropagation(); });
+    document.addEventListener("pointerdown", function(event) {
+        if (!event.target.closest(".header-action-wrap")) closeHeaderMenus();
     });
 
     document.addEventListener("keydown", showHelpOnEscape);
 
     document.querySelectorAll(".modal-overlay").forEach(function(modal) {
         modal.addEventListener("click", function(event) {
-            if (event.target === modal && modal.id !== "modal") {
-                closeUtilityModal(modal.id);
-            }
+            if (event.target === modal && modal.id !== "modal") closeUtilityModal(modal.id);
         });
     });
 
