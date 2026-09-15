@@ -33,7 +33,7 @@ function showPage(pageId) {
         }
     });
 
-    // On phones/tablets, selecting a page should always close the sidebar.
+    // Close the mobile sidebar after choosing a page.
     closeSidebar();
     closeHeaderMenus();
 }
@@ -45,24 +45,19 @@ function showPage(pageId) {
 function toggleSidebar() {
     const sidebar = document.querySelector(".sidebar");
     const overlay = document.getElementById("sidebarOverlay");
-
     if (!sidebar) return;
-
     const willOpen = !sidebar.classList.contains("show");
     sidebar.classList.toggle("show", willOpen);
-
     if (overlay) {
         overlay.classList.toggle("show", willOpen);
         overlay.setAttribute("aria-hidden", String(!willOpen));
     }
-
     document.body.classList.toggle("sidebar-open", willOpen);
 }
 
 function closeSidebar() {
     const sidebar = document.querySelector(".sidebar");
     const overlay = document.getElementById("sidebarOverlay");
-
     if (sidebar) sidebar.classList.remove("show");
     if (overlay) {
         overlay.classList.remove("show");
@@ -806,50 +801,42 @@ function closeHeaderMenus() {
     if (notificationPanel) notificationPanel.hidden = true;
     if (profileMenu) profileMenu.hidden = true;
     if (notificationButton) notificationButton.setAttribute("aria-expanded", "false");
-    if (profileButton) profileButton.setAttribute("aria-expanded", "false");
-    if (profileButton) profileButton.classList.remove("open");
-}
-
-function toggleNotifications(event) {
-    if (event) event.stopPropagation();
-
-    const panel = document.getElementById("notificationPanel");
-    const button = document.getElementById("notificationButton");
-    const profileMenu = document.getElementById("profileMenu");
-
-    if (!panel || !button) return;
-
-    const willOpen = panel.hidden;
-    if (profileMenu) profileMenu.hidden = true;
-    const profileButton = document.getElementById("profileButton");
     if (profileButton) {
         profileButton.setAttribute("aria-expanded", "false");
         profileButton.classList.remove("open");
     }
+}
 
-    panel.hidden = !willOpen;
-    button.setAttribute("aria-expanded", String(willOpen));
+function toggleNotifications(event) {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
+    const panel = document.getElementById("notificationPanel");
+    const button = document.getElementById("notificationButton");
+    const menu = document.getElementById("profileMenu");
+    const profileButton = document.getElementById("profileButton");
+    if (!panel || !button) return;
 
-    if (willOpen) renderNotifications();
+    const open = panel.hidden === true;
+    if (menu) menu.hidden = true;
+    if (profileButton) { profileButton.setAttribute("aria-expanded", "false"); profileButton.classList.remove("open"); }
+    panel.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open) renderNotifications();
 }
 
 function toggleProfileMenu(event) {
-    if (event) event.stopPropagation();
-
+    if (event) { event.preventDefault(); event.stopPropagation(); }
     const menu = document.getElementById("profileMenu");
     const button = document.getElementById("profileButton");
-    const notificationPanel = document.getElementById("notificationPanel");
+    const panel = document.getElementById("notificationPanel");
     const notificationButton = document.getElementById("notificationButton");
-
     if (!menu || !button) return;
 
-    const willOpen = menu.hidden;
-    if (notificationPanel) notificationPanel.hidden = true;
+    const open = menu.hidden === true;
+    if (panel) panel.hidden = true;
     if (notificationButton) notificationButton.setAttribute("aria-expanded", "false");
-
-    menu.hidden = !willOpen;
-    button.setAttribute("aria-expanded", String(willOpen));
-    button.classList.toggle("open", willOpen);
+    menu.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    button.classList.toggle("open", open);
 }
 
 function buildNotifications() {
@@ -939,7 +926,11 @@ function markNotificationsRead() {
 function openProfile() {
     closeHeaderMenus();
     const modal = document.getElementById("profileModal");
-    if (modal) modal.hidden = false;
+    if (modal) {
+        modal.hidden = false;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
 }
 
 function openSettings() {
@@ -951,18 +942,35 @@ function openSettings() {
 
     if (notificationToggle) notificationToggle.checked = settings.notifications !== false;
     if (compactToggle) compactToggle.checked = settings.compact === true;
-    if (modal) modal.hidden = false;
+    if (modal) {
+        modal.hidden = false;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
 }
 
 function showHelp() {
     closeHeaderMenus();
     const modal = document.getElementById("helpModal");
-    if (modal) modal.hidden = false;
+    if (modal) {
+        modal.hidden = false;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
 }
 
 function closeUtilityModal(id) {
     const modal = document.getElementById(id);
-    if (modal) modal.hidden = true;
+    if (modal) {
+        modal.hidden = true;
+        modal.classList.remove("show");
+    }
+    if (!["profileModal", "settingsModal", "helpModal"].some(function(modalId) {
+        const element = document.getElementById(modalId);
+        return element && !element.hidden;
+    })) {
+        document.body.classList.remove("modal-open");
+    }
 }
 
 function saveSetting(key, value) {
@@ -999,27 +1007,34 @@ function showHelpOnEscape(event) {
 document.addEventListener("DOMContentLoaded", function() {
     const notificationButton = document.getElementById("notificationButton");
     const profileButton = document.getElementById("profileButton");
-    const mobileMenu = document.querySelector(".mobile-menu");
+    const notificationPanel = document.getElementById("notificationPanel");
+    const profileMenu = document.getElementById("profileMenu");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const settings = getHeaderSettings();
 
-    if (notificationButton) notificationButton.addEventListener("click", toggleNotifications);
-    if (profileButton) profileButton.addEventListener("click", toggleProfileMenu);
-    if (mobileMenu) mobileMenu.addEventListener("click", function(event) { event.stopPropagation(); });
+    // Use pointer events so mouse, touch and pen input all behave consistently.
+    if (notificationButton) {
+        notificationButton.addEventListener("pointerdown", toggleNotifications);
+    }
+    if (profileButton) {
+        profileButton.addEventListener("pointerdown", toggleProfileMenu);
+    }
+
+    [notificationPanel, profileMenu].forEach(function(element) {
+        if (element) element.addEventListener("pointerdown", function(event) { event.stopPropagation(); });
+    });
+
+    document.addEventListener("pointerdown", function(event) {
+        if (!event.target.closest(".header-action-wrap")) closeHeaderMenus();
+    });
+
     if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
 
-    document.addEventListener("click", function() {
-        closeHeaderMenus();
-    });
-
-    ["notificationPanel", "profileMenu"].forEach(function(id) {
-        const element = document.getElementById(id);
-        if (element) element.addEventListener("click", function(event) { event.stopPropagation(); });
-    });
-
     document.addEventListener("keydown", function(event) {
-        showHelpOnEscape(event);
-        if (event.key === "Escape") closeSidebar();
+        if (event.key === "Escape") {
+            closeSidebar();
+            showHelpOnEscape(event);
+        }
     });
 
     window.addEventListener("resize", function() {
@@ -1028,9 +1043,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.querySelectorAll(".modal-overlay").forEach(function(modal) {
         modal.addEventListener("click", function(event) {
-            if (event.target === modal && modal.id !== "modal") {
-                modal.hidden = true;
-            }
+            if (event.target === modal && modal.id !== "modal") closeUtilityModal(modal.id);
         });
     });
 
