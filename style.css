@@ -1053,7 +1053,7 @@ td {
         transition: 0.3s;
     }
 
-    .sidebar.show {
+    .sidebar.open {
         transform: translateX(0);
     }
 
