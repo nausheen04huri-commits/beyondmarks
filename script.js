@@ -182,7 +182,11 @@ function renderStudentTable() {
             "<td>" + num(student.attendance).toFixed(1) + "%</td>" +
             "<td>-</td>" +
             "<td>" + academic + "</td>" +
-            "<td><span class='badge good'>Active</span></td>";
+            "<td><span class='badge good'>Active</span></td>" +
+"<td>" +
+    "<button type='button' onclick='editStudent(" + student.id + ")'>✏️</button> " +
+    "<button type='button' onclick='deleteStudent(" + student.id + ")'>🗑️</button>" +
+"</td>";
 
         table.appendChild(row);
     });
@@ -1055,3 +1059,86 @@ document.addEventListener("DOMContentLoaded", function() {
         if (screen) screen.hidden = false;
     }
 });
+// =========================
+// EDIT STUDENT
+// =========================
+
+async function editStudent(id) {
+    const student = students.find(function(s) {
+        return String(s.id) === String(id);
+    });
+
+    if (!student) {
+        alert("Student not found.");
+        return;
+    }
+
+    const name = prompt("Student Name:", student.name);
+    if (name === null) return;
+
+    const studentId = prompt("Student ID:", student.student_id);
+    if (studentId === null) return;
+
+    const department = prompt("Department:", student.department);
+    if (department === null) return;
+
+    const attendance = prompt("Attendance %:", student.attendance);
+    if (attendance === null) return;
+
+    try {
+        await getData(API + "/api/students/" + id, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name.trim(),
+                student_id: studentId.trim(),
+                department: department.trim(),
+                attendance: Number(attendance)
+            })
+        });
+
+        alert("Student updated successfully!");
+        await loadStudents();
+
+    } catch (error) {
+        console.error("Edit student:", error);
+        alert("Unable to update student.\n\n" + error.message);
+    }
+}
+
+
+// =========================
+// DELETE STUDENT
+// =========================
+
+async function deleteStudent(id) {
+    const student = students.find(function(s) {
+        return String(s.id) === String(id);
+    });
+
+    if (!student) {
+        alert("Student not found.");
+        return;
+    }
+
+    const confirmed = confirm(
+        "Are you sure you want to delete " + student.name + "?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+        await getData(API + "/api/students/" + id, {
+            method: "DELETE"
+        });
+
+        alert("Student deleted successfully!");
+        await loadStudents();
+
+    } catch (error) {
+        console.error("Delete student:", error);
+        alert("Unable to delete student.\n\n" + error.message);
+    }
+}
