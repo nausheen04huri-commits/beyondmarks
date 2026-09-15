@@ -42,7 +42,7 @@ function toggleSidebar() {
     const sidebar = document.querySelector(".sidebar");
 
     if (sidebar) {
-        sidebar.classList.toggle("open");
+        sidebar.classList.toggle("show");
     }
 }
 
@@ -746,6 +746,7 @@ async function refreshAll() {
     await loadActivities();
     await loadSkills();
     await loadAchievements();
+    renderNotifications();
 }
 
 document.addEventListener(
@@ -754,3 +755,254 @@ document.addEventListener(
         refreshAll();
     }
 );
+
+/* ================= HEADER FUNCTIONALITY ================= */
+
+const HEADER_SETTINGS_KEY = "beyondmarks_settings";
+const HEADER_SESSION_KEY = "beyondmarks_signed_out";
+
+function getHeaderSettings() {
+    try {
+        return JSON.parse(localStorage.getItem(HEADER_SETTINGS_KEY)) || {
+            notifications: true,
+            compact: false
+        };
+    } catch (error) {
+        return { notifications: true, compact: false };
+    }
+}
+
+function closeHeaderMenus() {
+    const notificationPanel = document.getElementById("notificationPanel");
+    const profileMenu = document.getElementById("profileMenu");
+    const notificationButton = document.getElementById("notificationButton");
+    const profileButton = document.getElementById("profileButton");
+
+    if (notificationPanel) notificationPanel.hidden = true;
+    if (profileMenu) profileMenu.hidden = true;
+    if (notificationButton) notificationButton.setAttribute("aria-expanded", "false");
+    if (profileButton) profileButton.setAttribute("aria-expanded", "false");
+    if (profileButton) profileButton.classList.remove("open");
+}
+
+function toggleNotifications(event) {
+    if (event) event.stopPropagation();
+
+    const panel = document.getElementById("notificationPanel");
+    const button = document.getElementById("notificationButton");
+    const profileMenu = document.getElementById("profileMenu");
+
+    if (!panel || !button) return;
+
+    const willOpen = panel.hidden;
+    if (profileMenu) profileMenu.hidden = true;
+    const profileButton = document.getElementById("profileButton");
+    if (profileButton) {
+        profileButton.setAttribute("aria-expanded", "false");
+        profileButton.classList.remove("open");
+    }
+
+    panel.hidden = !willOpen;
+    button.setAttribute("aria-expanded", String(willOpen));
+
+    if (willOpen) renderNotifications();
+}
+
+function toggleProfileMenu(event) {
+    if (event) event.stopPropagation();
+
+    const menu = document.getElementById("profileMenu");
+    const button = document.getElementById("profileButton");
+    const notificationPanel = document.getElementById("notificationPanel");
+    const notificationButton = document.getElementById("notificationButton");
+
+    if (!menu || !button) return;
+
+    const willOpen = menu.hidden;
+    if (notificationPanel) notificationPanel.hidden = true;
+    if (notificationButton) notificationButton.setAttribute("aria-expanded", "false");
+
+    menu.hidden = !willOpen;
+    button.setAttribute("aria-expanded", String(willOpen));
+    button.classList.toggle("open", willOpen);
+}
+
+function buildNotifications() {
+    const items = [];
+
+    if (Array.isArray(students)) {
+        students.forEach(function(student) {
+            const attendance = num(student.attendance);
+            if (attendance > 0 && attendance < 75) {
+                items.push({
+                    title: "Low attendance",
+                    text: (student.name || "A student") + " has " + attendance + "% attendance.",
+                    icon: "fa-user-clock",
+                    page: "students"
+                });
+            }
+        });
+    }
+
+    if (Array.isArray(achievements)) {
+        achievements.slice(-3).reverse().forEach(function(achievement) {
+            items.push({
+                title: "New achievement",
+                text: (achievement.student_name || achievement.name || "A student") + " received an achievement.",
+                icon: "fa-medal",
+                page: "achievements"
+            });
+        });
+    }
+
+    if (Array.isArray(activities) && activities.length) {
+        items.push({
+            title: "Activities updated",
+            text: activities.length + " activity record" + (activities.length === 1 ? " is" : "s are") + " available.",
+            icon: "fa-trophy",
+            page: "activities"
+        });
+    }
+
+    return items.slice(0, 8);
+}
+
+function renderNotifications() {
+    const list = document.getElementById("notificationList");
+    const count = document.getElementById("notificationCount");
+    const badge = document.getElementById("notificationBadge");
+    const settings = getHeaderSettings();
+
+    if (!list) return;
+
+    const items = buildNotifications();
+
+    if (!settings.notifications) {
+        list.innerHTML = '<div class="empty-notifications">Notifications are disabled in Settings.</div>';
+        if (count) count.textContent = "Disabled";
+        if (badge) badge.style.display = "none";
+        return;
+    }
+
+    if (!items.length) {
+        list.innerHTML = '<div class="empty-notifications"><i class="fa-regular fa-circle-check"></i><br><br>You\'re all caught up.</div>';
+    } else {
+        list.innerHTML = items.map(function(item) {
+            return '<button type="button" class="notification-item" onclick="openNotification(\'' + esc(item.page) + '\')">' +
+                '<span class="notification-icon"><i class="fa-solid ' + esc(item.icon) + '"></i></span>' +
+                '<span class="notification-copy"><strong>' + esc(item.title) + '</strong><small>' + esc(item.text) + '</small></span>' +
+            '</button>';
+        }).join("");
+    }
+
+    if (count) count.textContent = items.length + " new update" + (items.length === 1 ? "" : "s");
+    if (badge) badge.style.display = items.length ? "block" : "none";
+}
+
+function openNotification(pageId) {
+    closeHeaderMenus();
+    showPage(pageId);
+}
+
+function markNotificationsRead() {
+    const badge = document.getElementById("notificationBadge");
+    const count = document.getElementById("notificationCount");
+    if (badge) badge.style.display = "none";
+    if (count) count.textContent = "No new updates";
+}
+
+function openProfile() {
+    closeHeaderMenus();
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.hidden = false;
+}
+
+function openSettings() {
+    closeHeaderMenus();
+    const modal = document.getElementById("settingsModal");
+    const settings = getHeaderSettings();
+    const notificationToggle = document.getElementById("notificationsToggle");
+    const compactToggle = document.getElementById("compactToggle");
+
+    if (notificationToggle) notificationToggle.checked = settings.notifications !== false;
+    if (compactToggle) compactToggle.checked = settings.compact === true;
+    if (modal) modal.hidden = false;
+}
+
+function showHelp() {
+    closeHeaderMenus();
+    const modal = document.getElementById("helpModal");
+    if (modal) modal.hidden = false;
+}
+
+function closeUtilityModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.hidden = true;
+}
+
+function saveSetting(key, value) {
+    const settings = getHeaderSettings();
+    settings[key] = value;
+    localStorage.setItem(HEADER_SETTINGS_KEY, JSON.stringify(settings));
+
+    if (key === "compact") {
+        document.body.classList.toggle("compact-mode", value);
+    }
+
+    renderNotifications();
+}
+
+function logoutUser() {
+    closeHeaderMenus();
+    sessionStorage.setItem(HEADER_SESSION_KEY, "true");
+    const screen = document.getElementById("signedOutScreen");
+    if (screen) screen.hidden = false;
+}
+
+function signInAgain() {
+    sessionStorage.removeItem(HEADER_SESSION_KEY);
+    const screen = document.getElementById("signedOutScreen");
+    if (screen) screen.hidden = true;
+}
+
+function showHelpOnEscape(event) {
+    if (event.key !== "Escape") return;
+    closeHeaderMenus();
+    ["profileModal", "settingsModal", "helpModal"].forEach(closeUtilityModal);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const notificationButton = document.getElementById("notificationButton");
+    const profileButton = document.getElementById("profileButton");
+    const settings = getHeaderSettings();
+
+    if (notificationButton) notificationButton.addEventListener("click", toggleNotifications);
+    if (profileButton) profileButton.addEventListener("click", toggleProfileMenu);
+
+    document.addEventListener("click", function() {
+        closeHeaderMenus();
+    });
+
+    ["notificationPanel", "profileMenu"].forEach(function(id) {
+        const element = document.getElementById(id);
+        if (element) element.addEventListener("click", function(event) { event.stopPropagation(); });
+    });
+
+    document.addEventListener("keydown", showHelpOnEscape);
+
+    document.querySelectorAll(".modal-overlay").forEach(function(modal) {
+        modal.addEventListener("click", function(event) {
+            if (event.target === modal && modal.id !== "modal") {
+                modal.hidden = true;
+            }
+        });
+    });
+
+    document.body.classList.toggle("compact-mode", settings.compact === true);
+    renderNotifications();
+
+    if (sessionStorage.getItem(HEADER_SESSION_KEY) === "true") {
+        const screen = document.getElementById("signedOutScreen");
+        if (screen) screen.hidden = false;
+    }
+});

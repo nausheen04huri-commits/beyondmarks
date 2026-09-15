@@ -66,12 +66,12 @@
 
     <div class="sidebar-bottom">
 
-        <a href="#">
+        <a href="#" onclick="openSettings(); return false;">
             <i class="fa-solid fa-gear"></i>
             Settings
         </a>
 
-        <a href="#">
+        <a href="#" onclick="showHelp(); return false;">
             <i class="fa-solid fa-circle-question"></i>
             Help & Support
         </a>
@@ -108,18 +108,48 @@
                        onkeyup="searchStudent()">
             </div>
 
-            <button class="notification">
-                <i class="fa-regular fa-bell"></i>
-                <span></span>
-            </button>
+            <div class="header-action-wrap">
+                <button class="notification" id="notificationButton" type="button" aria-label="Open notifications" aria-expanded="false">
+                    <i class="fa-regular fa-bell"></i>
+                    <span id="notificationBadge"></span>
+                </button>
 
-            <div class="profile">
-                <div class="avatar">DR</div>
-                <div>
-                    <strong>Dr. Rahul</strong>
-                    <small>Faculty</small>
+                <div class="notification-panel" id="notificationPanel" hidden>
+                    <div class="panel-header">
+                        <div>
+                            <strong>Notifications</strong>
+                            <small id="notificationCount">0 new updates</small>
+                        </div>
+                        <button type="button" class="panel-link" onclick="markNotificationsRead()">Mark all read</button>
+                    </div>
+                    <div id="notificationList" class="notification-list"></div>
                 </div>
-                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+            <div class="header-action-wrap profile-wrap">
+                <button class="profile" id="profileButton" type="button" aria-label="Open profile menu" aria-expanded="false">
+                    <div class="avatar">DR</div>
+                    <div>
+                        <strong>Dr. Rahul</strong>
+                        <small>Faculty</small>
+                    </div>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+
+                <div class="profile-menu" id="profileMenu" hidden>
+                    <div class="profile-menu-head">
+                        <div class="avatar large">DR</div>
+                        <div>
+                            <strong>Dr. Rahul</strong>
+                            <small>Faculty • Student Development</small>
+                        </div>
+                    </div>
+                    <button type="button" onclick="openProfile()"><i class="fa-regular fa-user"></i> My Profile</button>
+                    <button type="button" onclick="openSettings()"><i class="fa-solid fa-gear"></i> Settings</button>
+                    <button type="button" onclick="showHelp()"><i class="fa-regular fa-circle-question"></i> Help & Support</button>
+                    <div class="menu-divider"></div>
+                    <button type="button" class="logout-item" onclick="logoutUser()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </div>
             </div>
 
         </div>
@@ -849,6 +879,60 @@
 
 </main>
 
+
+<!-- ================= PROFILE / SETTINGS / NOTIFICATION UI ================= -->
+
+<div class="modal-overlay" id="profileModal" hidden>
+    <div class="modal utility-modal">
+        <button class="close-modal" type="button" onclick="closeUtilityModal('profileModal')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="utility-icon"><i class="fa-regular fa-user"></i></div>
+        <h2>My Profile</h2>
+        <p>Your faculty account information.</p>
+        <div class="profile-detail-grid">
+            <div><small>Name</small><strong>Dr. Rahul</strong></div>
+            <div><small>Role</small><strong>Faculty</strong></div>
+            <div><small>Department</small><strong>Computer Science & Engineering</strong></div>
+            <div><small>Academic Year</small><strong>2026–27</strong></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal" hidden>
+    <div class="modal utility-modal">
+        <button class="close-modal" type="button" onclick="closeUtilityModal('settingsModal')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="utility-icon"><i class="fa-solid fa-gear"></i></div>
+        <h2>Settings</h2>
+        <p>Customize your BeyondMarks dashboard.</p>
+        <div class="settings-list">
+            <label class="setting-row"><span><strong>Notifications</strong><small>Show notification alerts in the header</small></span><input id="notificationsToggle" type="checkbox" checked onchange="saveSetting('notifications', this.checked)"></label>
+            <label class="setting-row"><span><strong>Compact mode</strong><small>Reduce spacing across dashboard cards</small></span><input id="compactToggle" type="checkbox" onchange="saveSetting('compact', this.checked)"></label>
+        </div>
+        <button class="primary-btn full-btn" type="button" onclick="closeUtilityModal('settingsModal')">Save & Close</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="helpModal" hidden>
+    <div class="modal utility-modal">
+        <button class="close-modal" type="button" onclick="closeUtilityModal('helpModal')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="utility-icon"><i class="fa-regular fa-circle-question"></i></div>
+        <h2>Help & Support</h2>
+        <p>Quick help for using the dashboard.</p>
+        <div class="help-list">
+            <div><i class="fa-solid fa-user-graduate"></i><span><strong>Students</strong><small>Add and search student development profiles.</small></span></div>
+            <div><i class="fa-solid fa-chart-line"></i><span><strong>Analytics</strong><small>Use Academics, Activities and Skills to review progress.</small></span></div>
+            <div><i class="fa-solid fa-bell"></i><span><strong>Notifications</strong><small>Open the bell to see attendance and achievement updates.</small></span></div>
+        </div>
+    </div>
+</div>
+
+<div class="signed-out-screen" id="signedOutScreen" hidden>
+    <div class="signed-out-card">
+        <div class="utility-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+        <h2>You are signed out</h2>
+        <p>This dashboard uses frontend session state. Backend authentication can be added separately for secure access.</p>
+        <button class="primary-btn" type="button" onclick="signInAgain()">Return to Dashboard</button>
+    </div>
+</div>
 
 <!-- ================= ADD STUDENT MODAL ================= -->
 
