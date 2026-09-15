@@ -914,7 +914,11 @@ function markNotificationsRead() {
 function openProfile() {
     closeHeaderMenus();
     const modal = document.getElementById("profileModal");
-    if (modal) modal.hidden = false;
+    if (modal) {
+        modal.hidden = false;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
 }
 
 function openSettings() {
@@ -926,18 +930,35 @@ function openSettings() {
 
     if (notificationToggle) notificationToggle.checked = settings.notifications !== false;
     if (compactToggle) compactToggle.checked = settings.compact === true;
-    if (modal) modal.hidden = false;
+    if (modal) {
+        modal.hidden = false;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
 }
 
 function showHelp() {
     closeHeaderMenus();
     const modal = document.getElementById("helpModal");
-    if (modal) modal.hidden = false;
+    if (modal) {
+        modal.hidden = false;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
 }
 
 function closeUtilityModal(id) {
     const modal = document.getElementById(id);
-    if (modal) modal.hidden = true;
+    if (modal) {
+        modal.hidden = true;
+        modal.classList.remove("show");
+    }
+    if (!["profileModal", "settingsModal", "helpModal"].some(function(modalId) {
+        const element = document.getElementById(modalId);
+        return element && !element.hidden;
+    })) {
+        document.body.classList.remove("modal-open");
+    }
 }
 
 function saveSetting(key, value) {
@@ -993,7 +1014,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".modal-overlay").forEach(function(modal) {
         modal.addEventListener("click", function(event) {
             if (event.target === modal && modal.id !== "modal") {
-                modal.hidden = true;
+                closeUtilityModal(modal.id);
             }
         });
     });
